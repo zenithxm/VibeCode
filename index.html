@@ -1634,6 +1634,8 @@
 
                 const authCode = handleOAuthRedirect();
                 if (authCode) {
+                    history.replaceState(null, null, window.location.pathname);
+
                     showLoading(['Finalizing Dropbox connection...']);
                     // This function will get the tokens and save them to localStorage.
                     await exchangeCodeForToken(authCode);
@@ -2432,7 +2434,6 @@
                 const code = params.get('code');
                 
                 if (code) {
-                    history.replaceState(null, null, ' '); // Clean the URL immediately
                     return code; // Return the code to be used by initializeApp
                 }
                 
