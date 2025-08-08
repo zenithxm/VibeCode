@@ -594,6 +594,21 @@
             gap: var(--spacing);
         }
         
+        .input-with-button {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing);
+        }
+
+        .input-with-button input {
+            flex-grow: 1;
+        }
+
+        #keywordSearchMode {
+            flex-shrink: 0;
+            width: 65px;
+        }
+
         .keyword-list {
             display: flex;
             gap: 5px;
@@ -1336,7 +1351,10 @@
                             <div class="form-row">
                                 <div class="form-group" style="flex: 2;">
                                     <label for="searchKeywords">Keywords (comma separated)</label>
-                                    <input type="text" id="searchKeywords" placeholder="e.g., salary, shopping, e-banking" class="dark-theme">
+                                    <div class="input-with-button">
+                                        <input type="text" id="searchKeywords" placeholder="e.g., salary, shopping, e-banking" class="dark-theme">
+                                        <button id="keywordSearchMode" class="btn btn-secondary" data-mode="OR">OR</button>
+                                    </div>
                                 </div>
                             </div>
                             <div class="form-row">
@@ -1627,19 +1645,64 @@
             <h2><i class="fas fa-info-circle"></i> How to Use</h2>
             <div class="tab-body dark-theme">
                 <ul>
-                    <li>Click "Add New" to open the paste dialog.</li>
-                    <li>Copy data from your online bank statement (select the table rows and press Ctrl+C).</li>
-                    <li>Paste the data into the text area (Ctrl+V).</li>
-                    <li>Click "Add Data" to parse and view your records.</li>
-                    <li>Use the tabs to switch between recent, all data, and JSON views. On small screens, click `+` to expand hidden details.</li>
-                    <li>Go to the <strong>Search</strong> page to filter your transactions by keyword, date, or amount.</li>
-                    <li>Go to the <strong>Summary</strong> page to see a categorized breakdown of your finances. On small screens, click `+` to expand hidden details.</li>
-                    <li>On the summary page, click any row to see the detailed transactions for that category and period.</li>
-                    <li>Click "Save" to upload your data to a private Dropbox folder.</li>
-                    <li>Go to the <strong>Categories</strong> page to define rules for sorting your transactions. On small screens, click `+` to expand hidden details.</li>
-                    <li>On the Categories page, drag and drop rows to change their priority.</li>
-                    <li>Go to the <strong>Bonds</strong> page to track your bond investments and their calculated returns against your statement data.</li>
-                    <li>On the Bonds page, click any row to see the detailed transactions that make up its real return. On small screens, click `+` to expand hidden details.</li>
+                    <li><strong>First Steps:</strong>
+                        <ul>
+                            <li>Upon loading, you will be prompted for a <strong>password</strong>. This is used to encrypt your data before it's saved, ensuring your privacy. Remember this password!</li>
+                            <li>In the sidebar, click the <strong>Dropbox status</strong> ("Not connected") to link your Dropbox account. This is required for saving and loading data.</li>
+                            <li>You can change your encryption password at any time using the <strong>"Change Password"</strong> option in the sidebar.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Account Statement Page:</strong>
+                        <ul>
+                            <li>Click <strong>"Add New"</strong> to open the paste dialog. For testing, you can use the "Sample" or "Dummy Data" buttons.</li>
+                            <li>Copy transaction rows from your online bank statement and paste them into the text area, then click <strong>"Add Data"</strong>.</li>
+                            <li>The <strong>Recent</strong> tab shows the data you just added, while the <strong>All Data</strong> tab shows your complete transaction history.</li>
+                            <li>Click the main <strong>"Save"</strong> button on this page to upload your encrypted bank statement to Dropbox.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Search Page:</strong>
+                        <ul>
+                            <li>Use the filters to find specific transactions.</li>
+                            <li>Enter comma-separated keywords. Use the <strong>OR/AND</strong> toggle button to define the search logic:
+                                <ul>
+                                    <li><strong>OR (default):</strong> Finds transactions matching at least one keyword.</li>
+                                    <li><strong>AND:</strong> Finds transactions matching all keywords.</li>
+                                </ul>
+                            </li>
+                            <li>You can also filter by a date range and/or a minimum/maximum amount.</li>
+                        </ul>
+                    </li>
+                     <li><strong>Categories Page:</strong>
+                        <ul>
+                             <li>Define rules here to automatically categorize your spending for the Summary page.</li>
+                             <li>Add a category with a name (e.g., "Utilities") and keywords (e.g., "electricity, internet, water").</li>
+                             <li>A transaction will now be included in the totals for <strong>every</strong> category whose keywords it matches.</li>
+                             <li>You can <strong>drag and drop</strong> rows to change their rank. This will controls the visual display order on this page and in the Summary report.</li>
+                             <li>Click <strong>"Save"</strong> on this page to upload your category rules to Dropbox.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Summary Page:</strong>
+                        <ul>
+                            <li>Get a categorized breakdown of your finances. Select a year and month, then click <strong>"Show"</strong>.</li>
+                            <li>The table displays credit, debit, and total amounts for the selected period and the full year.</li>
+                            <li>Click on any category row to see a detailed list of all transactions that were grouped into that line item.</li>
+                        </ul>
+                    </li>
+                    <li><strong>Bonds Page:</strong>
+                        <ul>
+                            <li>Track your bond investments and their returns.</li>
+                            <li>The table automatically calculates expected returns and compares them against actual coupon payments found in your bank statement.</li>
+                            <li>Click a bond row to see the specific transactions from your statement that are linked to it.</li>
+                            <li>Use the <strong>"Compare"</strong> button to see a side-by-side coupon payment schedule for all your bonds.</li>
+                            <li>Use the <strong>"Show Matured"</strong> checkbox to include or hide bonds that are past their maturity date.</li>
+                        </ul>
+                    </li>
+                     <li><strong>Syncing & Mobile Usage:</strong>
+                        <ul>
+                            <li>Click the <strong>"Sync All"</strong> button (top-left on desktop, floating button on mobile) to save your Statement, Categories, and Bonds to Dropbox in one go.</li>
+                            <li>On small screens, tables become responsive. If columns are hidden to fit the screen, a <strong>`+`</strong> icon will appear. Click it to expand the row and view the hidden information.</li>
+                        </ul>
+                    </li>
                 </ul>
             </div>
         </div>
@@ -1746,6 +1809,7 @@
         const showMaturedBonds = document.getElementById('showMaturedBonds');
         // Search page elements
         const searchKeywords = document.getElementById('searchKeywords');
+        const keywordSearchMode = document.getElementById('keywordSearchMode');
         const searchStartDate = document.getElementById('searchStartDate');
         const searchEndDate = document.getElementById('searchEndDate');
         const searchMinAmount = document.getElementById('searchMinAmount');
@@ -2130,6 +2194,18 @@
             // --- Search Page Listeners ---
             searchBtn.addEventListener('click', performSearch);
             clearSearchBtn.addEventListener('click', clearSearch);
+            
+            keywordSearchMode.addEventListener('click', () => {
+                const currentMode = keywordSearchMode.dataset.mode;
+                if (currentMode === 'OR') {
+                    keywordSearchMode.dataset.mode = 'AND';
+                    keywordSearchMode.textContent = 'AND';
+                } else {
+                    keywordSearchMode.dataset.mode = 'OR';
+                    keywordSearchMode.textContent = 'OR';
+                }
+            });
+
             searchFormHeader.addEventListener('click', () => {
                 isSearchFormCollapsed = !isSearchFormCollapsed;
                 searchFormContent.classList.toggle('collapsed');
@@ -3513,10 +3589,15 @@
             const keywordsText = searchKeywords.value.trim().toLowerCase();
             if (keywordsText) {
                 const keywords = keywordsText.split(',').map(k => k.trim()).filter(k => k);
+                const searchMode = keywordSearchMode.dataset.mode;
                 if (keywords.length > 0) {
                     results = results.filter(row => {
                         const description = row.Description.toLowerCase();
-                        return keywords.some(kw => description.includes(kw));
+                        if (searchMode === 'AND') {
+                            return keywords.every(kw => description.includes(kw));
+                        } else { // 'OR' mode
+                            return keywords.some(kw => description.includes(kw));
+                        }
                     });
                 }
             }
@@ -4385,7 +4466,10 @@
                 const amount = parseFloat(row.Amount) || 0;
                 const description = row.Description.toLowerCase();
                 let wasCategorized = false;
+
                 for (const cat of sortedCategories) {
+                    // We create a flag for the inner loop to see if this specific category matched.
+                    let categoryMatched = false;
                     for (const keyword of cat.keywords) {
                         if (description.includes(keyword.toLowerCase())) {
                             const assignedCategoryName = cat.name;
@@ -4399,12 +4483,16 @@
                                 else currentSummary.monthDb += amount;
                             }
 
+                            // Set both flags to true
                             wasCategorized = true;
+                            categoryMatched = true;
+                            // We break from the *inner* keyword loop, because we only need to add the amount
+                            // to this category ONCE, even if it matches multiple keywords in the same category.
                             break;
                         }
                     }
-                    if (wasCategorized) break;
                 }
+
                 if (!wasCategorized) {
                     const uncategorizedSummary = summaryDataMap.get('Uncategorized');
 
@@ -4494,6 +4582,7 @@
 
             summaryDetailTitle.innerHTML = `<i class="fas fa-list-ul"></i> Details for "${categoryName}" in ${monthName} ${selectedYear}`;
 
+            // Get all records for the selected time period first.
             let relevantRecords = parsedData.filter(row => {
                 const rowDate = new Date(row.Date.split('/').reverse().join('-'));
                 const isYearMatch = rowDate.getFullYear() === selectedYear;
@@ -4504,6 +4593,8 @@
             let detailRecords = [];
 
             if (categoryName === 'Uncategorized') {
+                // The logic for Uncategorized is different. It finds records that don't match ANY keyword from ANY category.
+                // This logic is still correct.
                 detailRecords = relevantRecords.filter(row => {
                     const description = row.Description.toLowerCase();
                     return !categories.some(cat =>
@@ -4511,27 +4602,19 @@
                     );
                 });
             } else {
+                // --- THIS IS THE UPDATED LOGIC FOR ALL OTHER CATEGORIES ---
+                
+                // 1. Find the specific category the user clicked on.
                 const category = categories.find(cat => cat.name === categoryName);
-                if (!category) return;
+                if (!category) return; // Exit if the category isn't found
 
+                // 2. Get the keywords for just that category.
                 const keywords = category.keywords.map(k => k.toLowerCase());
-                const sortedCategories = [...categories].sort((a, b) => a.rank - b.rank);
 
+                // 3. Filter the records. A record is included if its description contains ANY of this category's keywords.
                 detailRecords = relevantRecords.filter(row => {
                     const description = row.Description.toLowerCase();
-                    let assignedCategory = null;
-
-                    for (const cat of sortedCategories) {
-                        for (const kw of cat.keywords) {
-                            if (description.includes(kw.toLowerCase())) {
-                                assignedCategory = cat.name;
-                                break;
-                            }
-                        }
-                        if (assignedCategory) break;
-                    }
-
-                    return assignedCategory === categoryName;
+                    return keywords.some(kw => description.includes(kw));
                 });
             }
 
