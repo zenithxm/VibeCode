@@ -1617,6 +1617,7 @@
                 <button id="parseBtn" class="btn btn-primary"><i class="fas fa-plus"></i> Add Data</button>
                 <button id="clearPasteAreaBtn" class="btn btn-secondary"><i class="fas fa-eraser"></i> Clear</button>
                 <button id="sampleBtn" class="btn btn-warning"><i class="fas fa-lightbulb"></i> Sample</button>
+                <button id="dummyDataBtn" class="btn btn-dropbox"><i class="fas fa-magic"></i> Dummy Data</button>
             </div>
         </div>
     </div>
@@ -1678,6 +1679,7 @@
         const parseBtn = document.getElementById('parseBtn');
         const clearPasteAreaBtn = document.getElementById('clearPasteAreaBtn');
         const sampleBtn = document.getElementById('sampleBtn');
+        const dummyDataBtn = document.getElementById('dummyDataBtn');
         const uploadBtn = document.getElementById('uploadBtn');
         const uploadCategoryBtn = document.getElementById('uploadCategoryBtn');
         const allTableContainer = document.getElementById('all-table-container');
@@ -2191,6 +2193,7 @@
             });
             clearPasteAreaBtn.addEventListener('click', () => pasteArea.value = '');
             sampleBtn.addEventListener('click', loadSample);
+            dummyDataBtn.addEventListener('click', handleDummyData);
             authStatus.addEventListener('click', (e) => {
                 e.stopPropagation();
                 handleDropboxConnection();
@@ -2713,6 +2716,195 @@
             pasteArea.value = sampleData;
             showNotification('Sample data loaded!', 'success');
         }
+
+        async function handleDummyData() {
+            if (!confirm('This will erase all current data and generate a full set of dummy data for 2014-2015. Are you sure?')) {
+                return;
+            }
+
+            // A helper function to get a random integer
+            const getRandomInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+            // A helper to pick a random item from an array
+            const getRandomItem = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+            showLoading([
+                'Clearing existing data...',
+                'Generating dummy categories...',
+                'Generating dummy bonds...',
+                'Generating dummy statement (2 years)...',
+                'Rendering all views...'
+            ]);
+
+            // Use a slight delay to allow the UI to update
+            await new Promise(resolve => setTimeout(resolve, 100));
+
+            // 1. Clear Data
+            parsedData = [];
+            recentlyAddedData = []; // Clear this as well
+            categories = [];
+            bonds = [];
+            await updateLoadingStep(0, 'completed');
+
+            // 2. Generate Categories
+            categories = [
+                { name: 'Income', keywords: ['monthly salary', 'performance bonus'], rank: 0 },
+                { name: 'Utilities', keywords: ['electricity bill payment', 'isp charge'], rank: 1 },
+                { name: 'Lifestyle & Shopping', keywords: ['supermarket groceries', 'amazon purchase', 'restaurant dining'], rank: 2 },
+                { name: 'Finance & Investment', keywords: ['bond coupon', 'atm withdrawal', 'stock dividend'], rank: 3 }
+            ];
+            await updateLoadingStep(1, 'completed');
+
+
+            // 3. Generate Bonds
+            bonds = [
+                {
+                    serial: 'ORI018',
+                    type: 'Fixed',
+                    capital: 150000000,
+                    return: 6.8,
+                    settlement: '2014-03-11',
+                    maturity: '2017-03-11' // Matures after our dummy data period
+                },
+                {
+                    serial: 'SBR007',
+                    type: 'Spread',
+                    capital: 75000000,
+                    return: 7.1,
+                    settlement: '2013-09-20',
+                    maturity: '2015-09-20' // Matures WITHIN our dummy data period
+                },
+                {
+                    serial: 'ORI021',
+                    type: 'Fixed',
+                    capital: 200000000,
+                    return: 5.57,
+                    settlement: '2014-10-15',
+                    maturity: '2027-10-15' // Matures long after
+                }
+            ];
+            await updateLoadingStep(2, 'completed');
+
+            // 4. Generate Statement Data
+            let newStatementData = [];
+            let currentTotal = 50000000;
+            let recordCounter = 1;
+
+            const expenseDescriptions = [
+                'electricity bill payment', 'isp charge', 'supermarket groceries',
+                'amazon purchase', 'restaurant dining', 'atm withdrawal', 'e-banking transfer to friend',
+                'monthly insurance premium', 'online subscription service'
+            ];
+            const incomeDescriptions = ['monthly salary', 'performance bonus', 'stock dividend', 'freelance project payment'];
+
+            for (let year = 2014; year <= 2015; year++) {
+                for (let month = 0; month < 12; month++) {
+                    let recordsThisMonth = [];
+                    const numRecords = getRandomInt(5, 7);
+                    const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+                    // Add bond payments for this month
+                    bonds.forEach(bond => {
+                        const settlement = new Date(bond.settlement);
+                        const maturity = new Date(bond.maturity);
+                        const paymentDate = new Date(year, month, settlement.getDate()); // Pay on the same day as settlement
+
+                        // Coupon Payment
+                        if (paymentDate >= settlement && paymentDate < maturity) {
+                            const couponAmount = ((bond.capital * (bond.return / 100)) / 12) * 0.9;
+                            currentTotal += couponAmount;
+                            recordsThisMonth.push({
+                                No: 0, // Placeholder
+                                Date: `${String(paymentDate.getDate()).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`,
+                                Description: `KUPON ${bond.serial} bond coupon`,
+                                Branch: '0000',
+                                Amount: couponAmount,
+                                DBCR: 'CR',
+                                Balance: getRandomInt(10000000, 90000000),
+                                Total: currentTotal
+                            });
+                        }
+
+                        // Maturity Payment (Principal Return)
+                        if (maturity.getFullYear() === year && maturity.getMonth() === month) {
+                            const maturityDate = new Date(year, month, maturity.getDate());
+                            currentTotal += bond.capital;
+                            recordsThisMonth.push({
+                                No: 0, // Placeholder
+                                Date: `${String(maturityDate.getDate()).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`,
+                                Description: `PELUNASAN POKOK ${bond.serial}`,
+                                Branch: '0000',
+                                Amount: bond.capital,
+                                DBCR: 'CR',
+                                Balance: getRandomInt(10000000, 90000000),
+                                Total: currentTotal
+                            });
+                        }
+                    });
+
+                    // Add regular income (usually once a month)
+                    const salaryDay = getRandomInt(25, 28);
+                    const incomeAmount = getRandomInt(15000000, 25000000);
+                    currentTotal += incomeAmount;
+                    recordsThisMonth.push({
+                        No: 0,
+                        Date: `${String(salaryDay).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`,
+                        Description: getRandomItem(incomeDescriptions).toUpperCase(),
+                        Branch: '1234',
+                        Amount: incomeAmount,
+                        DBCR: 'CR',
+                        Balance: getRandomInt(10000000, 90000000),
+                        Total: currentTotal
+                    });
+
+                    // Add random expenses
+                    for (let i = 0; i < numRecords; i++) {
+                        const expenseDay = getRandomInt(1, daysInMonth);
+                        const expenseAmount = getRandomInt(50000, 2000000);
+                        currentTotal -= expenseAmount;
+                        recordsThisMonth.push({
+                            No: 0,
+                            Date: `${String(expenseDay).padStart(2, '0')}/${String(month + 1).padStart(2, '0')}/${year}`,
+                            Description: `TRSF E-BANKING DB ${getRandomItem(expenseDescriptions).toUpperCase()}`,
+                            Branch: '5678',
+                            Amount: expenseAmount,
+                            DBCR: 'DB',
+                            Balance: getRandomInt(10000000, 90000000),
+                            Total: currentTotal
+                        });
+                    }
+
+                    // Sort all records for the month by date before adding to the main list
+                    recordsThisMonth.sort((a, b) => {
+                        const dateA = new Date(a.Date.split('/').reverse().join('-'));
+                        const dateB = new Date(b.Date.split('/').reverse().join('-'));
+                        return dateA - dateB;
+                    });
+
+                    newStatementData.push(...recordsThisMonth);
+                }
+            }
+
+            // Finally, assign correct sequential numbers
+            newStatementData.forEach(row => {
+                row.No = recordCounter++;
+            });
+
+            parsedData = newStatementData;
+
+            await updateLoadingStep(3, 'completed');
+
+            // 5. Render everything
+            renderAllViews();
+            renderCategories();
+            renderBonds();
+            await updateLoadingStep(4, 'completed');
+
+            await hideLoading();
+            addRecordModal.classList.remove('show');
+            showNotification('Dummy data for 2 years has been loaded successfully!', 'success');
+        }
+
 
         function toggleAll(expand) {
             const contents = allTableContainer.querySelectorAll('.collapsible-content');
