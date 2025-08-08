@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -510,6 +511,7 @@
         .col-no-s { width: 40px; }
         .col-drag { width: 20px; }
         .col-date { width: 100px; }
+        .date-wrap { display: none; }
         .col-branch { width: 75px; }
         .col-amount, .col-balance, .col-total { width: 150px; text-align: right; }
         .col-dbcr { width: 75px; }
@@ -724,7 +726,7 @@
             font-size: 1rem; 
         }
 
-        .collapsible-header .icon { transition: transform 0.3s ease; }
+        .collapsible-header .icon { transition: transform 0.3s ease; width: 16px; height: 16px; }
         .collapsible-content { padding-left: var(--spacing); display: none; overflow: hidden; }
         .collapsible-content.open { display: block; }
 
@@ -913,6 +915,76 @@
             font-style: italic;
         }
 
+        /* --- 2.12 Dropdown Component --- */
+        .dropdown-container {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-toggle {
+            /* Uses existing .btn styles */
+            width: 100%;
+            text-align: left;
+            justify-content: space-between; /* Puts icon on the right */
+        }
+
+        /* Adds the caret icon to the button */
+        .dropdown-toggle::after {
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            content: '\f0d7'; /* fa-caret-down */
+            transition: transform 0.2s ease-in-out;
+        }
+
+        .dropdown-menu {
+            display: none;
+            position: absolute;
+            background-color: var(--light);
+            min-width: 260px; /* Set a minimum width */
+            box-shadow: var(--box-shadow);
+            border: 1px solid var(--form-input-border);
+            border-radius: var(--border-radius);
+            z-index: 100;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 5px 0;
+        }
+
+        body.dark-theme .dropdown-menu {
+            background-color: var(--light-gray);
+            border-color: var(--form-input-border);
+        }
+
+        .dropdown-menu.show {
+            display: block;
+        }
+
+        /* Rotate caret when the menu is shown */
+        .dropdown-menu.show + .dropdown-toggle::after {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu label {
+            display: block;
+            padding: 8px 15px;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 10px; /* Space between checkbox and text */
+        }
+
+        .dropdown-menu label:hover {
+            background-color: var(--table-row-hover);
+        }
+
+        .dropdown-menu input[type="checkbox"] {
+            /* Style the checkbox itself if needed */
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0; /* Prevent checkbox from shrinking */
+        }
+
 
         /* ==========================================================================
            3. UTILITY & STATE CLASSES
@@ -946,6 +1018,176 @@
             0% { transform: rotate(0deg); } 
             100% { transform: rotate(360deg); } 
         }
+
+        /* ==========================================================================
+           5. MOBILE RESPONSIVE STYLES
+           ========================================================================== */
+        @media (max-width: 768px) {
+            /* --- Core Layout Redefined for Mobile --- */
+            html, body {
+                overflow: auto; 
+                -webkit-overflow-scrolling: touch;
+            }
+
+            body {
+                /* Adjust padding for BOTH top and bottom bars */
+                padding: 5px;
+                padding-top: 70px; /* Space for the new top bar */
+                padding-bottom: 70px; /* Space for the existing bottom bar */
+            }
+
+            /* --- CRITICAL: Neuter the sidebar container so it doesn't create a blank column --- */
+            .sidebar {
+                width: 0 !important; 
+                padding: 0;
+                box-shadow: none;
+                background: transparent;
+                transition: none;
+                cursor: default;
+            }
+
+            /* --- NEW: Target the main menu specifically and make it a fixed top bar --- */
+            .sidebar-main-menu {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 65px;
+                z-index: 1010;
+                
+                /* Arrange items horizontally */
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                gap: 0;
+                
+                /* Style the bar itself */
+                background: var(--light);
+                border-bottom: 1px solid var(--light-gray);
+                padding: 0; /* Override any existing padding */
+            }
+
+            /* --- Sidebar Footer becomes the fixed bottom bar (no change in concept) --- */
+            .sidebar-footer {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 65px;
+                z-index: 1010;
+                display: flex;
+                flex-direction: row;
+                align-items: stretch;
+                background: var(--light);
+                border-top: 1px solid var(--light-gray);
+                padding: 0;
+                gap: 0;
+            }
+            
+            /* --- Shared styles for items in BOTH top and bottom bars --- */
+            .sidebar-main-menu .menu-item,
+            .sidebar-footer-menu .menu-item {
+                flex: 1;
+                flex-direction: column;
+                justify-content: center;
+                gap: 4px;
+                padding: 5px 2px;
+                border-radius: 0;
+            }
+            
+            /* --- Hide text labels in BOTH bars for a cleaner mobile look --- */
+            .sidebar-main-menu .menu-item span,
+            .sidebar-footer-menu .menu-item span,
+            .sidebar-footer .status-text-wrapper {
+                display: none;
+            }
+            
+            /* --- Target the footer menu container directly --- */
+            .sidebar-footer-menu {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-around;
+                width: 100%;
+                flex-grow: 1;
+                gap: 0;
+            }
+            
+            /* --- Floating Action Button (Sync) --- */
+            .sidebar-header {
+                position: fixed;
+                bottom: 75px; /* Position above the bottom bar */
+                left: 15px;    /* Adjusted position since left rail is gone */
+                z-index: 1011;
+                padding: 0;
+                border: none;
+            }
+
+            .sync-all-btn {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                justify-content: center;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            }
+            .sync-all-btn span { display: none; }
+            .sync-all-btn i { font-size: 1.2rem; }
+
+            /* --- Dark Theme Overrides for New Mobile Elements --- */
+            body.dark-theme .sidebar-main-menu {
+                background: var(--light-gray);
+                border-bottom-color: var(--form-input-border);
+            }
+            body.dark-theme .sidebar-footer {
+                background: var(--light-gray);
+                border-top-color: var(--form-input-border);
+            }
+
+            /* 
+             * =============================================
+             * NEW: Specific override for Last Update item
+             * =============================================
+            */
+            #lastUpdateInfo i {
+                display: none; /* Hide the clock icon */
+            }
+
+            #lastUpdateInfo .status-text-wrapper,
+            #lastUpdateInfo .status-text-wrapper span {
+                display: flex; /* Show the text container, overriding the generic 'display: none' */
+                flex-direction: column; /* Stack the label and value vertically */
+                align-items: center; /* Center them horizontally */
+                font-size: 0.7rem; /* Make text a bit smaller to fit nicely */
+                line-height: 1.2;
+            }
+            
+            /* --- Hide Elements Not Needed on Mobile --- */
+            #sidebar-toggle-btn,
+            .sidebar.collapsed .menu-item::after {
+                display: none;
+            }
+
+            /* --- Other General Mobile Adjustments (Unchanged) --- */
+            .card-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            .card-header h2 { font-size: 1.25rem; }
+            .card-header-actions { flex-wrap: wrap; width: 100%; gap: 5px; }
+            .form-row, .summary-controls { flex-direction: column; align-items: stretch; }
+            .form-group { min-width: 100%; }
+            th, td { font-size: 0.85rem; }
+            .modal-content { width: 98%; max-height: 85vh; }
+            .collapsible-header { grid-template-columns: auto 1fr auto; gap: 8px; }
+            .collapsible-header .total-cr,
+            .collapsible-header .total-db { display: none; }
+            #bond-compare-controls { flex-direction: column; align-items: flex-start; }
+            
+            .date-wrap {
+                display: block;
+            }
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -956,9 +1198,9 @@
                 <i class="fas fa-sync fa-fw"></i> <span>Sync All</span>
             </button>
         </div>
-        <div class="sidebar-menu">
+        <div class="sidebar-menu sidebar-main-menu">
             <div class="menu-item active" data-page="home" data-tooltip="Account Statement">
-                <i class="fas fa-home fa-fw"></i> <span>Account Statement</span>
+                <i class="fas fa-university fa-fw"></i> <span>Account Statement</span>
             </div>
             <div class="menu-item" data-page="search" data-tooltip="Search">
                 <i class="fas fa-search fa-fw"></i> <span>Search</span>
@@ -974,7 +1216,7 @@
             </div>
         </div>
         <div class="sidebar-footer">
-            <div class="sidebar-menu">
+            <div class="sidebar-menu sidebar-footer-menu">
                 <div class="menu-item" id="infoMenuItem" data-tooltip="How to Use">
                     <i class="fas fa-info-circle fa-fw"></i> <span>How to Use</span>
                 </div>
@@ -1032,7 +1274,7 @@
                                         <th class="description-column" data-priority="2">Description</th>
                                         <th class="col-branch" data-priority="7">Branch</th>
                                         <th class="col-amount" data-priority="3">Amount</th>
-                                        <th class="col-dbcr" data-priority="6">DBCR</th>
+                                        <th class="col-dbcr" data-priority="6"></th>
                                         <th class="col-balance" data-priority="4">Balance</th>
                                         <th class="col-total" data-priority="5">Total</th>
                                     </tr>
@@ -1115,7 +1357,7 @@
                                     <th class="col-date" data-priority="1">Date</th>
                                     <th class="description-column" data-priority="2">Description</th>
                                     <th class="col-amount" data-priority="3">Amount</th>
-                                    <th class="col-dbcr" data-priority="4">DBCR</th>
+                                    <th class="col-dbcr" data-priority="4"></th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
@@ -1856,18 +2098,24 @@
                     e.stopPropagation();
                     handleDropboxConnection();
                 });
-                uploadBtn.addEventListener('click', () => uploadDataToDropbox({
-                    data: parsedData,
-                    dropboxPath: DEFAULT_DROPBOX_PATH,
-                    dataTypeName: 'Bank Statement',
-                    options: { showUi: true }
-                }));
-                uploadCategoryBtn.addEventListener('click', () => uploadDataToDropbox({
-                    data: categories,
-                    dropboxPath: CATEGORY_DROPBOX_PATH,
-                    dataTypeName: 'Categories',
-                    options: { showUi: true }
-                }));
+                uploadBtn.addEventListener('click', () => {                    
+                    if (!confirm('Are you sure you want to save the current Bank Statement to Dropbox?')) return;
+                    uploadDataToDropbox({
+                        data: parsedData,
+                        dropboxPath: DEFAULT_DROPBOX_PATH,
+                        dataTypeName: 'Bank Statement',
+                        options: { showUi: true }
+                    })
+                });
+                uploadCategoryBtn.addEventListener('click', () => {                    
+                    if (!confirm('Are you sure you want to save the current Categories to Dropbox?')) return;
+                    uploadDataToDropbox({
+                        data: categories,
+                        dropboxPath: CATEGORY_DROPBOX_PATH,
+                        dataTypeName: 'Categories',
+                        options: { showUi: true }
+                    })
+                });
                 allTableContainer.addEventListener('click', function(e) {
                     const header = e.target.closest('.collapsible-header');
                     if (header) {
@@ -1890,12 +2138,15 @@
                     categoryFormHeader.classList.toggle('collapsed');
                 });
                 // Bond Page Listeners
-                uploadBondBtn.addEventListener('click', () => uploadDataToDropbox({
-                    data: bonds,
-                    dropboxPath: BOND_DROPBOX_PATH,
-                    dataTypeName: 'Bonds',
-                    options: { showUi: true }
-                }));
+                uploadBondBtn.addEventListener('click', () => {                    
+                    if (!confirm('Are you sure you want to save the current Bonds to Dropbox?')) return;
+                    uploadDataToDropbox({
+                        data: bonds,
+                        dropboxPath: BOND_DROPBOX_PATH,
+                        dataTypeName: 'Bonds',
+                        options: { showUi: true }
+                    })
+                });
                 addBondBtn.addEventListener('click', addBond);
                 updateBondBtn.addEventListener('click', updateBond);
                 cancelBondEditBtn.addEventListener('click', cancelBondEdit);
@@ -2037,7 +2288,7 @@
                         <th class="description-column" data-priority="2">Description</th>
                         <th class="col-branch" data-priority="7">Branch</th>
                         <th class="col-amount" data-priority="3">Amount</th>
-                        <th class="col-dbcr" data-priority="6">DBCR</th>
+                        <th class="col-dbcr" data-priority="6"></th>
                         <th class="col-balance" data-priority="4">Balance</th>
                         <th class="col-total" data-priority="5">Total</th>
                     </tr>
@@ -2066,11 +2317,10 @@
                 recentlyAddedData.forEach(row => {
                     const tr = document.createElement('tr');
                     tr.className = 'parent-row';
-                    // --- MODIFICATION: Added class to description cell ---
                     tr.innerHTML = `
                         <td class="toggle-column column-hidden"><span class="toggle-icon"></span></td>
                         <td>${row.No}</td>
-                        <td>${row.Date}</td>
+                        <td>${formatDate(row.Date)}</td>
                         <td class="description-column">${row.Description}</td>
                         <td>${row.Branch}</td>
                         <td class="money-cell">${formatMoney(row.Amount)}</td>
@@ -2148,15 +2398,13 @@
                         
                         const headers = Object.keys(rows[0]);
 
-                        // --- MODIFICATION START ---
-                        // Replaced the inline style for Description with a class for better control.
                         monthsHtml += '<table><thead><tr>' + 
                         '<th class="toggle-column column-hidden"></th>' +
                         '<th class="col-no" data-priority="8">No</th>' +
                         '<th class="col-date" data-priority="1">Date</th>' +
-                        '<th class="description-column" data-priority="2">Description</th>' + // Applied class here
+                        '<th class="description-column" data-priority="2">Description</th>' +
                         '<th class="col-branch" data-priority="6">Branch</th>' +
-                        '<th class="col-dbcr" data-priority="5">DBCR</th>' +
+                        '<th class="col-dbcr" data-priority="5"></th>' +
                         '<th class="col-amount" data-priority="3">Amount</th>' +
                         '<th class="col-balance" data-priority="4">Balance</th>' +
                         '<th class="col-total" data-priority="7">Total</th>' +
@@ -2166,21 +2414,26 @@
                             monthsHtml += '<tr class="parent-row">';
                             monthsHtml += '<td class="toggle-column column-hidden"><span class="toggle-icon"></span></td>';
                             headers.forEach(header => {
-                                // Add the 'description-column' class to the correct body cell
                                 let classAttr = '';
-                                if (header === 'Description') {
-                                    classAttr = 'class="description-column"';
+                                let value;
+                                
+                                if (header === 'Date') {
+                                    value = formatDate(row[header]);
                                 } else if (['Amount', 'Balance', 'Total'].includes(header)) {
                                     classAttr = 'class="money-cell"';
+                                    value = formatMoney(row[header]);
+                                } else if (header === 'Description') {
+                                    classAttr = 'class="description-column"';
+                                    value = row[header] || '';
+                                } else {
+                                    value = row[header] || '';
                                 }
                                 
-                                const value = classAttr.includes('money-cell') ? formatMoney(row[header]) : (row[header] || '');
                                 monthsHtml += `<td ${classAttr}>${value}</td>`;
                             });
                             monthsHtml += '</tr>';
                             monthsHtml += '<tr class="child-row column-hidden"><td colspan="9"></td></tr>';
                         });
-                        // --- MODIFICATION END ---
                         monthsHtml += '</tbody></table></div>';
                     });
                     const yearDelta = yearCredit - yearDebit;
@@ -2531,7 +2784,9 @@
             
             // NEW: Master sync function to upload all data
             async function syncAllData() {
-                try {
+                try {                  
+                    if (!confirm('Are you sure you want to save the current data to Dropbox?')) return;
+
                     await ensureValidAccessToken();
                     
                     const steps = ['Syncing Bank Statement', 'Syncing Categories', 'Syncing Bonds'];
@@ -2592,6 +2847,8 @@
                 const { loadingUi = null, showSuccessNotification = false } = options;
                 
                 try {
+                    await ensureValidAccessToken();
+                    
                     // This function is only called after the initial token check, so we can proceed.
                     if (loadingUi) {
                         showLoading(loadingUi.steps);
@@ -2839,13 +3096,40 @@
                 return response.json();
             }
             
-            function formatDate(isoDateString) {
-                if (!isoDateString) return '';
-                const date = new Date(isoDateString);
+            /**
+             * Formats a date string from multiple possible formats into "DD Mon YYYY".
+             * @param {string | Date} dateString - The date string (e.g., "DD/MM/YYYY", "YYYY-MM-DD", ISO string) or a Date object.
+             * @returns {string} The formatted date string or the original string if invalid.
+             */
+            function formatDate(dateString) {
+                if (!dateString) {
+                    return '';
+                }
+
+                let date;
+
+                if (dateString instanceof Date) {
+                    date = dateString;
+                } else if (typeof dateString === 'string' && dateString.includes('/')) {
+                    const parts = dateString.split('/');
+                    if (parts.length === 3) {
+                        // Assumes DD/MM/YYYY format
+                        date = new Date(parts[2], parts[1] - 1, parts[0]);
+                    }
+                } else {
+                    // Handles YYYY-MM-DD and other ISO-like formats recognized by new Date()
+                    date = new Date(dateString);
+                }
+
+                if (!date || isNaN(date.getTime())) {
+                    return dateString; // Return original string if parsing fails
+                }
+
                 const day = date.getDate().toString().padStart(2, '0');
                 const month = date.toLocaleString('default', { month: 'short' });
                 const year = date.getFullYear();
-                return `<b>${day} ${month} ${year}</b>`;
+                
+                return `${day} ${month} <span class="date-wrap">\n</span>${year}`;
             }
             
             function showNotification(message, type = 'success') {
@@ -2998,7 +3282,7 @@
                     tr.innerHTML = `
                         <td class="toggle-column column-hidden"><span class="toggle-icon"></span></td>
                         <td>${row.No}</td>
-                        <td>${row.Date}</td>
+                        <td>${formatDate(row.Date)}</td>
                         <td class="description-column">${row.Description}</td>
                         <td class="money-cell">${formatMoney(row.Amount)}</td>
                         <td>${row.DBCR}</td>
@@ -3414,7 +3698,6 @@
                     const maturity = new Date(bond.maturity);
                     const today = new Date();
                     today.setHours(0, 0, 0, 0); // Compare against the start of today
-                    // Keep if maturity date is invalid OR if it's in the future
                     return isNaN(maturity.getTime()) || maturity >= today;
                 });
 
@@ -3425,24 +3708,32 @@
                     return;
                 }
 
-                // 1. Build Controls
-                let controlsHtml = '<div id="bond-compare-controls"><strong>Show/Hide Bonds:</strong>';
+                // 1. Build Controls with the new Dropdown structure
+                let controlsHtml = `
+                    <div id="bond-compare-controls">
+                        <div class="dropdown-container">
+                            <button id="bond-visibility-toggle" class="btn btn-secondary dropdown-toggle">
+                                <span>Show/Hide Bonds</span>
+                            </button>
+                            <div id="bond-visibility-menu" class="dropdown-menu">`;
                 bondsToCompare.forEach((bond, index) => {
                     controlsHtml += `
                         <label>
                             <input type="checkbox" class="visibility-toggle" data-col-index="${index + 1}" checked>
-                            ${bond.serial}
+                            <span>${bond.serial}</span>
                         </label>
                     `;
                 });
-                controlsHtml += '</div>';
+                controlsHtml += `
+                            </div>
+                        </div>
+                    </div>
+                `;
 
-                // 2. Build Table
+                // 2. Build Table (this part remains unchanged)
                 let tableHtml = '<div class="table-container" id="bond-compare-table-container"><table id="bondCompareTable">';
-
-                // 2.1 Table Head
                 tableHtml += '<thead><tr>';
-                tableHtml += '<th>Coupon #</th>'; 
+                tableHtml += '<th>#</th>'; 
                 bondsToCompare.forEach(bond => {
                     const maturity = new Date(bond.maturity);
                     const isMatured = !isNaN(maturity.getTime()) && new Date() > maturity;
@@ -3457,8 +3748,6 @@
                         </th>`;
                 });
                 tableHtml += '</tr></thead>';
-
-                // 2.2 Table Body
                 tableHtml += '<tbody>';
                 const bondCouponDetails = bondsToCompare.map(bond => {
                     const settlement = new Date(bond.settlement);
@@ -3469,14 +3758,12 @@
                     }
                     const capital = parseFloat(bond.capital) || 0;
                     const annualReturnPercent = parseFloat(bond.return) || 0;
-                    const monthlyCoupon = ((capital * (annualReturnPercent / 100)) / 12) * 0.90; // Assuming monthly, 10% tax
+                    const monthlyCoupon = ((capital * (annualReturnPercent / 100)) / 12) * 0.90;
                     return { numCoupons: monthsDiff, amount: monthlyCoupon };
                 });
-
                 const maxCoupons = Math.max(0, ...bondCouponDetails.map(d => d.numCoupons));
-
                 for (let i = 1; i <= maxCoupons; i++) {
-                    tableHtml += `<tr><td>${i}</td>`; // Coupon number column
+                    tableHtml += `<tr><td>${i}</td>`;
                     bondCouponDetails.forEach(details => {
                         if (i <= details.numCoupons) {
                             tableHtml += `<td class="money-cell">${formatMoney(details.amount)}</td>`;
@@ -3496,15 +3783,21 @@
             }
 
             function attachCompareViewListeners() {
-                const controls = document.getElementById('bond-compare-controls');
-                if (!controls) return;
+                const toggleBtn = document.getElementById('bond-visibility-toggle');
+                const menu = document.getElementById('bond-visibility-menu');
+                if (!toggleBtn || !menu) return;
 
-                // Use event delegation on the controls container
-                controls.addEventListener('change', (e) => {
+                const dropdownContainer = toggleBtn.closest('.dropdown-container');
+
+                // 1. Open/Close the dropdown when the button is clicked
+                toggleBtn.addEventListener('click', () => {
+                    menu.classList.toggle('show');
+                });
+
+                // 2. Handle checkbox changes to show/hide table columns
+                menu.addEventListener('change', (e) => {
                     if (e.target.classList.contains('visibility-toggle')) {
                         // The index of the column to toggle (e.g., 2nd, 3rd...)
-                        // data-col-index is the 0-based index of the bond + 1
-                        // Add 1 again because nth-child is 1-based and the first col is "Coupon #"
                         const colToShowHide = parseInt(e.target.dataset.colIndex) + 1;
                         const isChecked = e.target.checked;
                         const table = document.getElementById('bondCompareTable');
@@ -3517,6 +3810,14 @@
                                 cell.style.display = isChecked ? '' : 'none';
                             }
                         });
+                    }
+                });
+
+                // 3. Close the dropdown when clicking anywhere outside of it
+                window.addEventListener('click', (e) => {
+                    // If the menu is open AND the click was NOT inside the dropdown container
+                    if (menu.classList.contains('show') && !dropdownContainer.contains(e.target)) {
+                        menu.classList.remove('show');
                     }
                 });
             }
@@ -3536,7 +3837,7 @@
                 if (detailRecords.length === 0) {
                     summaryDetailBody.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>No return transactions found in the statement for this bond.</p></div>`;
                 } else {
-                    let tableHtml = `<div class="table-container"><table><thead><tr><th>Date</th><th>Description</th><th class="col-number">Amount</th><th>CR/DB</th></tr></thead><tbody>`;
+                    let tableHtml = `<div class="table-container"><table><thead><tr><th>Date</th><th>Description</th><th class="col-number">Amount</th><th></th></tr></thead><tbody>`;
                     
                     let totalCredited = 0;
                     detailRecords.forEach(row => {
@@ -3544,7 +3845,7 @@
                         
                         tableHtml += `
                             <tr>
-                                <td>${row.Date}</td>
+                                <td>${formatDate(row.Date)}</td>
                                 <td class="description-column">${row.Description}</td>
                                 <td class="money-cell">${formatMoney(row.Amount)}</td>
                                 <td>${row.DBCR}</td>
@@ -3934,12 +4235,12 @@
                 if (detailRecords.length === 0) {
                     summaryDetailBody.innerHTML = `<div class="empty-state"><i class="fas fa-box-open"></i><p>No transactions found for this category in the selected period.</p></div>`;
                 } else {
-                    let tableHtml = `<div class="table-container"><table><thead><tr><th>Date</th><th>Description</th><th class="col-number">Amount</th><th>CR/DB</th></tr></thead><tbody>`;
+                    let tableHtml = `<div class="table-container"><table><thead><tr><th>Date</th><th>Description</th><th class="col-number">Amount</th><th></th></tr></thead><tbody>`;
                     
                     detailRecords.forEach(row => {
                         tableHtml += `
                             <tr>
-                                <td>${row.Date}</td>
+                                <td>${formatDate(row.Date)}</td>
                                 <td class="description-column">${row.Description}</td>
                                 <td class="money-cell">${formatMoney(row.Amount)}</td>
                                 <td>${row.DBCR}</td>
