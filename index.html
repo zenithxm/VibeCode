@@ -1232,7 +1232,7 @@
             .form-row, .summary-controls { flex-direction: column; align-items: stretch; }
             .form-group { min-width: 100%; }
             th, td { font-size: 0.85rem; }
-            .modal-content { width: 98%; max-height: 85vh; }
+            .modal-content { width: 98%; max-height: 85vh; margin-bottom: 300px;}
             .collapsible-header { grid-template-columns: auto 1fr auto; gap: 8px; }
             .collapsible-header .total-cr,
             .collapsible-header .total-db { display: none; }
@@ -1857,7 +1857,7 @@
         const passwordToggleIcons = document.querySelectorAll('.password-toggle-icon');
         // END: New "Change Password" elements
 
-        let isCategoryFormCollapsed = false;
+        let isCategoryFormCollapsed = true;
         let isBondFormCollapsed = false;
         let isSearchFormCollapsed = false;
         // Application state
