@@ -860,24 +860,32 @@
         #bond-content #bond-table-container {
             display: flex; /* .data-form is a flex-column */
             flex-direction: column;
+            visibility: visible;
+            height: auto;
         }
         #bond-content #bond-table-container {
             display: block; /* The container itself is a block */
+            visibility: visible;
+            height: auto;
         }
         #bond-content #bond-compare-view {
-            display: none;
+            visibility: hidden;
+            height: 0px;
         }
 
         /* When in compare mode, hide list/form and show compare view */
         #bond-content.view-compare .data-form,
         #bond-content.view-compare #bond-table-container {
-            display: none;
+            visibility: hidden;
+            height: 0px;
         }
         #bond-content.view-compare #bond-compare-view {
             display: flex;
             flex-direction: column;
             flex-grow: 1;
             overflow: hidden;
+            visibility: visible;
+            height: auto;
         }
         
         #bond-compare-controls {
@@ -1561,6 +1569,7 @@
                             <thead>
                                 <tr>
                                     <th class="toggle-column column-hidden"></th>
+                                    <th data-priority="1">No</th>
                                     <th data-priority="1">Serial</th>
                                     <th data-priority="2" class="col-number">Capital</th>
                                     <th data-priority="11">Type</th>
@@ -3946,6 +3955,7 @@
                 return;
             }
 
+            let numberRow = 0;
             bondsToRender.forEach((bond) => {
                 // Find the index from the original 'bonds' array to ensure correct editing/deleting
                 const originalIndex = bonds.indexOf(bond);
@@ -4009,8 +4019,10 @@
                 }
 
                 // --- Build the HTML for the row ---
+                numberRow++;
                 row.innerHTML = `
                         <td class="toggle-column column-hidden"><span class="toggle-icon"></span></td>
+                        <td>${numberRow}</td>
                         <td>${bond.serial}</td>
                         <td class="money-cell">${formatMoney(capital)}</td>
                         <td>${bond.type}</td>
