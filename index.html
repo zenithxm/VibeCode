@@ -742,8 +742,8 @@
         }
 
         .collapsible-header .icon { transition: transform 0.3s ease; width: 16px; height: 16px; }
-        .collapsible-content { padding-left: var(--spacing); display: none; overflow: hidden; }
-        .collapsible-content.open { display: block; }
+        .collapsible-content { padding-left: var(--spacing); visibility: hidden; overflow: hidden; height: 0px; }
+        .collapsible-content.open { visibility: visible; height: auto; }
 
         .header-title {
             white-space: nowrap;
@@ -762,8 +762,16 @@
 
         .total-cr { color: var(--success); }
         .total-db { color: var(--danger); }
+
         .delta-positive { color: var(--success); }
         .delta-negative { color: var(--danger); }
+        
+        .on-complete { color: var(--success); }
+        .on-progress { color: var(--warning); }
+
+        .value-up { color: var(--success); }
+        .value-stay { color: var(--warning); }
+        .value-down { color: var(--danger); }
 
         /* --- 2.9 Loading & Notifications --- */
         #loading-overlay {
@@ -1149,9 +1157,9 @@
             /* --- Floating Action Button (Sync) --- */
             .sidebar-header {
                 position: fixed;
-                bottom: 75px; /* Position above the bottom bar */
-                left: 15px;    /* Adjusted position since left rail is gone */
-                z-index: 1011;
+                top: 75px; 
+                right: 15px; 
+                z-index: 1;
                 padding: 0;
                 border: none;
             }
@@ -1174,6 +1182,11 @@
             body.dark-theme .sidebar-footer {
                 background: var(--light-gray);
                 border-top-color: var(--form-input-border);
+            }
+
+            .toggle-column {
+                min-width: 50px;
+                font-size: 1.7rem;
             }
 
             /* 
@@ -4126,7 +4139,7 @@
             bondsToCompare.forEach(bond => {
                 const maturity = new Date(bond.maturity);
                 const isMatured = !isNaN(maturity.getTime()) && new Date() > maturity;
-                const colorClass = isMatured ? 'delta-positive' : 'delta-negative';
+                const colorClass = isMatured ? 'on-complete' : 'on-progress';
 
                 tableHtml += `
                         <th>
@@ -4147,21 +4160,35 @@
                 }
                 const capital = parseFloat(bond.capital) || 0;
                 const annualReturnPercent = parseFloat(bond.return) || 0;
-                const monthlyCoupon = ((capital * (annualReturnPercent / 100)) / 12) * 0.90;
+
+                const detailRecords = parsedData.filter(t =>
+                    t.Description.toLowerCase().includes(bond.serial.toLowerCase()) && t.DBCR === 'CR'
+                );
+
                 return {
                     numCoupons: monthsDiff,
-                    amount: monthlyCoupon
+                    detailRecords: detailRecords,
+                    prevAmount: 0
                 };
             });
             const maxCoupons = Math.max(0, ...bondCouponDetails.map(d => d.numCoupons));
             for (let i = 1; i <= maxCoupons; i++) {
                 tableHtml += `<tr><td>${i}</td>`;
                 bondCouponDetails.forEach(details => {
-                    if (i <= details.numCoupons) {
-                        tableHtml += `<td class="money-cell">${formatMoney(details.amount)}</td>`;
+                    let detailAmount = 0;
+                    //console.log(details.detailRecords.length);
+                    if (details.detailRecords.length >= i)
+                        detailAmount = details.detailRecords[i-1].Amount;
+                        
+                    const colorClass = detailAmount > details.prevAmount ? 'value-up' : detailAmount < details.prevAmount ? 'value-down' : 'value-stay';
+                    
+                    if (detailAmount != 0) {
+                        tableHtml += `<td class="money-cell ${colorClass}">${formatMoney(detailAmount)}</td>`;
                     } else {
                         tableHtml += '<td>-</td>';
                     }
+
+                    details.prevAmount = detailAmount;
                 });
                 tableHtml += '</tr>';
             }
