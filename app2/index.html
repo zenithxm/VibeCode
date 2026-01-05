@@ -2243,6 +2243,8 @@
             }
 
             {
+                monthTarget = monthTarget <= 0 ? 400 : monthTarget;
+
                 let width = (monthProgress/monthTarget * 100).toFixed(2);
                 if (monthProgress >= monthTarget) {
                     monthProgressBar.classList.add('full');
@@ -3705,3 +3707,4 @@
 
 </body>
 </html>
+
