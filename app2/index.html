@@ -2210,13 +2210,14 @@
             const todayDate = new Date();
 
             const filterYearSummaryData = [...summaryParsedData].filter(row => row.Year.toString() === todayDate.getFullYear().toString());
+            console.log(filterYearSummaryData);
 
             let monthTarget = 0;
             let monthProgress = 0;            
             let yearTarget = 0;
             let yearProgress = 0;
             filterYearSummaryData.forEach(row => {
-                if (row.Month.toString() === todayDate.getMonth().toString()) {
+                if (row.Month.toString() === (todayDate.getMonth() + 1).toString()) {
                     monthTarget = parseInt(row.Target);
                     monthProgress = parseInt(row.Total);
                 }
