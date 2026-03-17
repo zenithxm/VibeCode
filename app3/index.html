@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DM Combat Companion</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <style>
+        [x-cloak] { display: none !important; }
+        .stat-block { font-family: 'Georgia', serif; background: #fdf1dc; border: 2px solid #704422; border-radius: 4px; }
+        .monster-card { transition: transform 0.1s; }
+        .monster-card:active { transform: scale(0.98); }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen pb-24" x-data="app()" x-init="init()">
+
+    <nav class="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-4 z-50 shadow-2xl">
+        <button @click="tab = 'initiative'" :class="tab === 'initiative' ? 'text-orange-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+        </button>
+        <button @click="tab = 'players'" :class="tab === 'players' ? 'text-blue-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+        </button>
+        <button @click="tab = 'database'" :class="tab === 'database' ? 'text-orange-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V7a2 2 0 00-2-2H7a2 2 0 00-2 2v14l3.5-2 3.5 2 3.5-2 3.5 2zM10 8.5a.5.5 0 11-1 0 .5.5 0 011 0zm5 0a.5.5 0 11-1 0 .5.5 0 011 0z" />
+            </svg>
+        </button>
+        <button @click="tab = 'settings'" :class="tab === 'settings' ? 'text-slate-100 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+        </button>
+    </nav>
+
+    <main class="p-4 max-w-md mx-auto">
+        
+        <div x-show="tab === 'initiative'" x-cloak>            
+            <div class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md pt-2 pb-4 border-b border-slate-800 mb-4">
+                <div class="flex justify-between items-end mb-4">
+                    <h1 @click="showSummary = !showSummary" 
+                        class="text-2xl font-black text-orange-500 cursor-pointer flex items-center gap-2 select-none active:opacity-70">
+                        ENCOUNTER
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="showSummary ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                        </svg>
+                    </h1>
+                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1" 
+                        x-text="initiativeList.filter(e => !e.isPlayer).length + ' Monsters total'"></span>
+                    <button @click="clearCombat()" class="text-xs text-slate-500 underline uppercase tracking-widest">Clear Combat</button>
+                </div>
+                <div x-show="showSummary" 
+                    x-transition:enter="transition ease-out duration-200"
+                    x-transition:enter-start="opacity-0 -translate-y-2"
+                    x-transition:enter-end="opacity-100 translate-y-0"
+                    class="mt-2 p-3 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl">
+                    
+                    <template x-if="monsterSummary.length === 0">
+                        <p class="text-xs text-slate-500 italic">No monsters in initiative.</p>
+                    </template>
+
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="item in monsterSummary" :key="item.name">
+                            <div class="flex items-center bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 gap-2">
+                                <span class="text-xs font-bold text-slate-100" x-text="item.name"></span>
+                                <span class="bg-orange-600 text-white text-[10px] font-black px-1.5 rounded" x-text="item.count"></span>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+
+                <div class="flex flex-row gap-2 h-12">
+                    <button @click="showAddMonsterModal = true" 
+                            class="flex-1 bg-orange-600 hover:bg-orange-500 rounded-lg shadow-lg flex flex-col items-center justify-center text-white border-b-2 border-orange-800 active:border-b-0 active:translate-y-[2px] transition-all">
+                        
+                        <span class="text-xs font-black uppercase tracking-tighter"><span class="text-lg leading-none">+</span> Monster</span>
+                    </button>
+
+                    <button @click="showAddPlayerModal = true" 
+                            class="flex-1 bg-blue-600 hover:bg-blue-500 rounded-lg shadow-lg flex flex-col items-center justify-center text-white border-b-2 border-blue-800 active:border-b-0 active:translate-y-[2px] transition-all">
+                        
+                        <span class="text-xs font-black uppercase tracking-tighter"><span class="text-lg leading-none">+</span> Player</span>
+                    </button>
+
+                    <button @click="nextTurn()" 
+                            class="w-20 bg-yellow-600 hover:bg-yellow-500 rounded-lg shadow-[0_0_15px_rgba(202,138,4,0.2)] flex flex-col items-center justify-center text-white border-b-2 border-yellow-800 active:border-b-0 active:translate-y-[2px] transition-all relative overflow-hidden">
+                        <div class="absolute inset-0 bg-white/10 animate-pulse" x-show="activeTurnIndex !== null"></div>
+                        
+                        <span class="text-lg font-black uppercase relative">⚔️</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <template x-for="(entity, index) in initiativeList" :key="entity.id">
+                    <div :id="'entity-' + entity.id"
+                        class="rounded-xl border overflow-hidden shadow-lg monster-card transition-all duration-300 mb-4" 
+                        :class="[
+                            activeTurnIndex === index ? 'ring-4 ring-yellow-500 border-yellow-500 scale-[1.01]' : '',
+                            entity.isPlayer ? 'bg-slate-800 border-blue-900/50' : 'bg-slate-800 border-slate-700'
+                        ]">
+                        
+                        <template x-if="activeTurnIndex === index">
+                            <div class="bg-yellow-500 text-yellow-950 text-[10px] font-black uppercase text-center py-1 tracking-widest">
+                                Current Turn
+                            </div>
+                        </template>
+                        
+                        <div class="bg-slate-800 rounded-2xl border border-slate-700 shadow-xl overflow-hidden" 
+                            @click="!entity.isPlayer && toggleDetails(entity.id)">
+                            
+                            <div class="p-4 flex items-center justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="relative group">
+                                        <div class="absolute inset-0 blur-sm opacity-20" :class="entity.isPlayer ? 'bg-blue-500' : 'bg-orange-500'"></div>
+                                        <div class="relative w-12 h-12 flex flex-col items-center justify-center rounded-xl border-2 font-black shadow-lg"
+                                            :class="entity.isPlayer ? 'bg-slate-900 border-blue-500 text-blue-400' : 'bg-slate-900 border-orange-500 text-orange-500'">
+                                            <span class="text-[10px] uppercase leading-none mb-0.5 opacity-60">Init</span>
+                                            <span class="text-xl leading-none" x-text="entity.init"></span>
+                                        </div>
+                                    </div>
+
+                                    <div>
+                                        <div class="font-black text-lg tracking-tight text-slate-100" x-text="entity.displayName"></div>
+                                        <template x-if="entity.isPlayer">
+                                            <span class="text-[10px] font-bold text-blue-400 uppercase tracking-widest px-2 py-0.5 bg-blue-500/10 rounded-full border border-blue-500/20">Player Character</span>
+                                        </template>
+                                        <template x-if="!entity.isPlayer">
+                                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest" x-text="entity.stats.size + ' ' + entity.stats.type"></span>
+                                        </template>
+                                    </div>
+                                </div>
+
+                                <button @click.stop="removeFromInitiative(index, entity.name, entity.instanceNum, entity.isPlayer)" 
+                                        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-red-500/10 text-slate-500 hover:text-red-500 transition-all">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+
+                            <div x-show="!entity.isPlayer" class="bg-slate-900/50 border-t border-slate-700/50 p-3 flex items-center justify-between gap-4" 
+                                x-data="{ activeTarget: 'hp' }"> <div class="flex items-center gap-2">
+                                    <div class="w-12 py-1.5 bg-slate-800 border border-slate-700 rounded-xl flex flex-col items-center justify-center shadow-sm">
+                                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-tighter leading-none mb-1">AC</span>
+                                        <span class="text-sm font-black text-slate-100" x-text="entity.ac"></span>
+                                    </div>
+
+                                    <div @click.stop="activeTarget = 'hp'" 
+                                        :class="activeTarget === 'hp' ? 'ring-2 ring-blue-500 border-blue-400' : 'border-slate-700'"
+                                        class="cursor-pointer min-w-[70px] px-2 py-1.5 bg-slate-800 border rounded-xl flex flex-col items-center justify-center shadow-sm transition-all">
+                                        <span class="text-[8px] font-black text-slate-500 uppercase tracking-tighter leading-none mb-1">Health</span>
+                                        <div class="text-sm font-black flex items-baseline gap-0.5">
+                                            <span :class="entity.currentHp <= 0 ? 'text-red-500 line-through' : 'text-slate-100'" x-text="entity.currentHp"></span>
+                                            <span class="text-[10px] text-slate-500 font-bold">/</span>
+                                            <span class="text-[10px] text-slate-500 font-bold" x-text="entity.maxHp"></span>
+                                        </div>
+                                    </div>
+
+                                    <div @click.stop="activeTarget = 'temp'" 
+                                        :class="activeTarget === 'temp' ? 'ring-2 ring-yellow-500 border-yellow-400' : 'border-slate-700'"
+                                        class="cursor-pointer min-w-[50px] px-2 py-1.5 bg-slate-800 border rounded-xl flex flex-col items-center justify-center shadow-sm transition-all">
+                                        <span class="text-[8px] font-black text-yellow-600/80 uppercase tracking-tighter leading-none mb-1">Temp</span>
+                                        <span class="text-sm font-black text-yellow-500" x-text="entity.tempHp || 0"></span>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center bg-slate-800 rounded-xl border border-slate-600 p-1 shadow-2xl">
+                                    <button @click.stop="applyChange(entity, 'dmg', activeTarget)" 
+                                            class="w-11 h-11 flex items-center justify-center bg-red-500/10 text-red-500 rounded-lg active:scale-90 transition-transform">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" /></svg>
+                                    </button>
+
+                                    <input type="number" 
+                                        :id="'hp-change-' + entity.id"
+                                        placeholder="0" 
+                                        class="w-12 bg-transparent text-center text-lg font-black text-white outline-none placeholder:text-slate-700"
+                                        @click.stop>
+
+                                    <button @click.stop="applyChange(entity, 'heal', activeTarget)" 
+                                            class="w-11 h-11 flex items-center justify-center bg-green-500/10 text-green-500 rounded-lg active:scale-90 transition-transform">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        
+                        <div x-show="openDetail === entity.id && !entity.isPlayer" class="p-5 stat-block text-slate-900 text-sm border-t-4 border-orange-800 mx-2 mb-2 shadow-inner">
+                            <div class="flex justify-between items-start border-b-2 border-orange-900 pb-1 mb-1">
+                                <div>
+                                    <h3 class="text-xl font-black text-orange-900 uppercase leading-none" x-text="entity.name"></h3>
+                                    <p class="text-[10px] text-orange-800 font-bold uppercase" x-text="entity.stats.document__title"></p>
+                                    <p class="italic text-xs" x-text="entity.stats.size + ' - ' + entity.stats.type + ' - ' + entity.stats.alignment"></p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-xs font-bold uppercase">CR</span>
+                                    <div class="text-lg font-black text-orange-900 leading-none" x-text="entity.stats.challenge_rating"></div>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-1">
+                                <p><strong class="text-orange-900">Armor Class</strong> <span x-text="entity.ac"></span></p>
+                                <p><strong class="text-orange-900">Hit Points</strong> <span x-text="entity.hp"></span></p>
+                            </div>
+                            
+                            <hr class="border-orange-900 my-2 opacity-30">
+                            
+                            <div class="grid grid-cols-6 gap-1 text-center">
+                                <template x-for="stat in ['str','dex','con','int','wis','cha']" :key="stat">
+                                    <div class="text-center">
+                                        <div class="font-bold text-[10px] uppercase text-orange-900" x-text="stat"></div>
+                                        <div class="font-bold text-sm flex flex-col">
+                                            <span x-text="`${(Math.floor(((entity.stats[stat] || 10) - 10) / 2) >= 0 ? '+' : '')}${Math.floor(((entity.stats[stat] || 10) - 10) / 2)}`"></span>
+                                            
+                                            <span class="text-[9px] text-slate-500" x-text="entity.stats[stat] || 10"></span>
+                                        </div>
+                                    </div>
+                                </template>
+                            </div>
+                            
+                            <hr class="border-orange-900 my-2 opacity-30">
+
+                            <template x-if="entity.stats.trait">
+                                <div class="mt-2">
+                                    <template x-for="trait in entity.stats.trait" :key="trait.name">
+                                        <div class="mb-3 text-xs leading-normal text-slate-900">
+                                            <strong class="italic font-bold" x-text="trait.name + '.'"></strong>
+                                            <span x-html="trait.entries ? format5e(trait.entries) : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="entity.stats.action">
+                                <div class="mt-4">
+                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Actions</h4>
+                                    <template x-for="act in entity.stats.action" :key="act.name">
+                                        <div class="mb-3 text-xs leading-normal text-slate-900">
+                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
+                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="entity.stats.bonus">
+                                <div class="mt-4">
+                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Bonus Actions</h4>
+                                    <template x-for="act in entity.stats.bonus" :key="act.name">
+                                        <div class="mb-3 text-xs leading-normal text-slate-900">
+                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
+                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+
+                            <template x-if="entity.stats.reaction">
+                                <div class="mt-4">
+                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Reactions</h4>
+                                    <template x-for="act in entity.stats.reaction" :key="act.name">
+                                        <div class="mb-3 text-xs leading-normal text-slate-900">
+                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
+                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
+                                        </div>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="tab === 'players'" x-cloak>
+            <h1 class="text-2xl font-black text-blue-500 mb-4 uppercase">Manage Party</h1>
+    
+            <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6 space-y-3">
+                <div>
+                    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Player Name</label>
+                    <input type="text" x-model="newPlayerName" placeholder="Character Name..." 
+                        class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 text-white">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Max HP</label>
+                        <input type="number" x-model="newPlayerHp" placeholder="HP" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 text-white text-center">
+                    </div>
+                    <div>
+                        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Armor Class</label>
+                        <input type="number" x-model="newPlayerAc" placeholder="AC" 
+                            class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 text-white text-center">
+                    </div>
+                </div>
+
+                <button @click="addPlayerToDb()" class="w-full bg-blue-600 hover:bg-blue-500 py-3 rounded-xl font-black text-white shadow-lg transition-all mt-2">
+                    + SAVE TO PARTY
+                </button>
+            </div>
+
+            <div class="space-y-2">
+                <template x-for="p in playerDb" :key="p.id">
+                    <div class="bg-slate-800 border border-slate-700 p-3 rounded-xl flex items-center justify-between">
+                        <div>
+                            <div class="font-bold text-slate-100" x-text="p.name"></div>
+                            <div class="text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
+                                HP: <span class="text-blue-400" x-text="p.hp"></span> | AC: <span class="text-blue-400" x-text="p.ac"></span>
+                            </div>
+                        </div>
+                        <button @click="playerDb = playerDb.filter(x => x.id !== p.id); saveLocalStorage('player')" class="text-slate-600 hover:text-red-500 p-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                        </button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="tab === 'database'" x-cloak>
+            <div class="flex justify-between items-center mb-4">
+                <h1 class="text-2xl font-black text-orange-500">LIBRARY</h1>
+                <div class="flex gap-2">
+                    <button @click="refreshLibrary()" 
+                            class="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-300 font-bold uppercase tracking-widest transition-colors">
+                        <span x-show="!loading">↺ Sync Data</span>
+                        <span x-show="loading">Syncing...</span>
+                    </button>
+                    <button @click="clearAllData()" 
+                            class="text-[10px] bg-red-900/40 hover:bg-red-600 px-3 py-1 rounded text-red-400 hover:text-white font-bold uppercase tracking-widest transition-colors border border-red-900/50">
+                        Clear All
+                    </button>
+                </div>
+            </div>
+            
+            <div class="flex gap-2 mb-2">
+                <input type="text" x-model="searchQuery" @keyup.enter="searchMonster()" 
+                       placeholder="Search monster name..." 
+                       class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none">
+                <button @click="searchMonster()" class="bg-orange-600 px-6 rounded-lg font-bold shadow-lg" :disabled="loading">
+                    <span x-show="!loading">Search</span>
+                    <span x-show="loading">...</span>
+                </button>
+            </div>
+
+            <div x-show="searchResults.length > 0" class="mb-8 bg-slate-800 border border-orange-900/30 rounded-lg overflow-hidden">
+                <div class="bg-slate-700 px-4 py-2 text-xs font-bold text-slate-300 uppercase tracking-widest">Search Results</div>
+                <template x-for="res in searchResults" :key="res.slug">
+                    <div class="flex justify-between items-center p-4 border-b border-slate-700 last:border-0">
+                        <div>
+                            <div class="font-bold" x-text="res.name"></div>
+                            <div class="text-[9px] text-slate-500 italic">Formerly: <span x-text="res.former"></span></div>
+                            <div class="text-[10px] text-orange-400 uppercase font-bold" x-text="res.document__title"></div>
+                            <div class="text-xs text-slate-400">CR <span x-text="res.challenge_rating"></span> • <span x-text="res.type"></span></div>
+                        </div>
+                        <button @click="saveToDb(res)" class="bg-blue-600 text-xs font-bold px-3 py-1 rounded uppercase tracking-tighter">Add to Library</button>
+                    </div>
+                </template>
+            </div>
+
+            <div class="space-y-2 mt-6">
+                <h2 class="text-slate-500 text-xs font-bold uppercase tracking-widest px-1">Saved Monsters</h2>
+                <template x-for="m in database" :key="m.slug">
+                    <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
+                        <div>
+                            <div class="font-bold text-slate-200" x-text="m.name"></div>                            
+                            <div class="text-[10px] text-orange-400 uppercase font-bold" x-text="m.source"></div>
+                            <div class="text-[10px] text-slate-500 uppercase">
+                                <span x-text="m.type"></span> • CR <span x-text="m.cr"></span> • AC <span x-text="m.ac"></span> • HP <span x-text="m.hp"></span> 
+                            </div>
+                        </div>
+                        <button @click="deleteFromDb(m.slug)" class="text-red-900 bg-red-400/10 hover:bg-red-400/20 px-3 py-1 rounded-md text-xs font-bold">Remove</button>
+                    </div>
+                </template>
+            </div>
+        </div>
+
+        <div x-show="tab === 'settings'" x-cloak>
+            <h1 class="text-2xl font-black text-slate-100 mb-6 uppercase">Settings & Backup</h1>
+
+            <div class="space-y-6">
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <h2 class="text-lg font-bold text-white mb-2">Export Data</h2>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">Download your library, party, and active encounter as a .json file to move it to a different phone or computer.</p>
+                    <button @click="exportData()" 
+                            class="w-full bg-slate-700 hover:bg-slate-600 py-3 rounded-xl font-black text-white border-b-4 border-slate-900 active:border-b-0 active:translate-y-[2px] transition-all flex items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        EXPORT BACKUP
+                    </button>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <h2 class="text-lg font-bold text-white mb-2">Import Data</h2>
+                    <p class="text-xs text-slate-400 mb-4 leading-relaxed">Upload a previously exported .json file. <span class="text-red-400 font-bold">Warning: This replaces all current data!</span></p>
+                    
+                    <label class="block">
+                        <span class="sr-only">Choose backup file</span>
+                        <input type="file" @change="importData($event)" accept=".json"
+                            class="block w-full text-sm text-slate-500
+                                    file:mr-4 file:py-3 file:px-4
+                                    file:rounded-xl file:border-0
+                                    file:text-xs file:font-black file:uppercase
+                                    file:bg-blue-600 file:text-white
+                                    hover:file:bg-blue-500 cursor-pointer">
+                    </label>
+                    <template x-if="importError">
+                        <p class="mt-3 text-xs text-red-500 font-bold" x-text="importError"></p>
+                    </template>
+                </div>
+
+                <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
+                    <h2 class="text-lg font-bold text-white mb-2">Search Sources</h2>
+                    <p class="text-xs text-slate-400 mb-4">Add 5etools short-codes (e.g., 'vgm', 'pota', 'ftd') to expand your library search.</p>
+                    
+                    <div class="flex gap-2 mb-4">
+                        <input type="text" x-model="newSourceBook" placeholder="Book code..." 
+                            class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 outline-none focus:ring-2 focus:ring-orange-500 text-white">
+                        <button @click="addSourceBook()" class="bg-orange-600 px-4 rounded-xl font-black text-xs uppercase tracking-widest text-white">Add</button>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <template x-for="(code, index) in sourceBooks" :key="index">
+                            <div class="flex items-center gap-2 bg-slate-900 border border-slate-700 px-3 py-1.5 rounded-lg">
+                                <span class="text-xs font-black text-orange-400 uppercase" x-text="code"></span>
+                                <button @click="removeSourceBook(index)" class="text-slate-500 hover:text-red-500">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                                </button>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div x-show="showAddMonsterModal" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[100]" x-cloak>
+        <div class="bg-slate-800 w-full max-w-sm rounded-2xl p-6 border border-orange-500/30">
+            <h2 class="text-orange-500 font-black mb-4 uppercase">Select Monster</h2>
+            <div class="max-h-64 overflow-y-auto space-y-2 mb-4 pr-2">
+                <template x-for="m in database" :key="m.slug">
+                    <button @click="addToInitiative(m); showAddMonsterModal = false" 
+                            class="w-full text-left bg-slate-700 p-3 rounded-lg hover:bg-slate-600 flex justify-between items-center">
+                        <span class="font-bold" x-text="m.name"></span>
+                        <span class="text-xs text-orange-400">Add +</span>
+                    </button>
+                </template>
+                <div x-show="database.length === 0" class="text-slate-500 italic text-center p-4">No monsters in library</div>
+            </div>
+            <button @click="showAddMonsterModal = false" class="w-full p-2 text-slate-400 text-sm">Close</button>
+        </div>
+    </div>
+
+    <div x-show="showAddPlayerModal" 
+        class="fixed inset-0 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4 z-[100]" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 scale-90"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-cloak>
+        
+        <div class="bg-slate-900 w-full max-w-md rounded-3xl p-6 border border-slate-700 shadow-2xl overflow-hidden relative">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-blue-500 font-black uppercase tracking-widest">Select Player</h2>
+                <button @click="showAddPlayerModal = false" class="text-slate-500 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+
+            <div class="max-h-[60vh] overflow-y-auto space-y-3 pr-1 no-scrollbar">
+                <template x-for="p in playerDb" :key="p.id">
+                    <div class="bg-slate-800 border border-slate-700 p-4 rounded-2xl flex flex-col gap-3 shadow-sm transition-all">
+                        
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <div class="font-black text-slate-100 text-lg leading-tight" x-text="p.name"></div>
+                                <div class="flex gap-2 mt-1">
+                                    <span class="text-[9px] px-2 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/20 font-bold uppercase">HP: <span x-text="p.hp"></span></span>
+                                    <span class="text-[9px] px-2 py-0.5 rounded bg-slate-700 text-slate-300 border border-slate-600 font-bold uppercase">AC: <span x-text="p.ac"></span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-2 mt-1">
+                            <div class="flex-1 flex items-center bg-slate-900 border border-slate-600 rounded-xl px-3 h-12 focus-within:ring-2 focus-within:ring-blue-500 transition-all">
+                                <span class="text-[10px] font-black text-slate-500 uppercase mr-2">Init</span>
+                                <input type="number" :id="'init-'+p.id" placeholder="0" 
+                                    class="bg-transparent w-full text-white font-black outline-none text-lg">
+                            </div>
+                            
+                            <button @click="addPlayerToInitiative(p)" 
+                                    class="h-12 px-6 bg-blue-600 hover:bg-blue-500 rounded-xl font-black text-xs uppercase tracking-widest text-white border-b-4 border-blue-800 active:border-b-0 active:translate-y-[2px] transition-all">
+                                ADD
+                            </button>
+                        </div>
+                    </div>
+                </template>
+
+                <div x-show="playerDb.length === 0" class="flex flex-col items-center justify-center py-10 opacity-40">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    <p class="italic text-sm">Add players in Party tab first</p>
+                </div>
+            </div>
+            
+            <div class="mt-6 pt-4 border-t border-slate-800">
+                <button @click="showAddPlayerModal = false" class="w-full py-3 text-slate-500 font-bold text-xs uppercase tracking-widest hover:text-white transition-colors">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div x-show="showToast" 
+        x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 translate-y-10"
+        x-transition:enter-end="opacity-100 translate-y-0"
+        x-transition:leave="transition ease-in duration-200"
+        x-transition:leave-start="opacity-100 translate-y-0"
+        x-transition:leave-end="opacity-0 translate-y-10"
+        class="fixed bottom-24 left-1/2 -translate-x-1/2 z-[100] w-auto min-w-[250px] pointer-events-none"
+        x-cloak>
+        <div class="bg-slate-800 border border-orange-500/50 text-white px-6 py-3 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.5)] flex items-center justify-center gap-3">
+            <div class="bg-orange-500 rounded-full p-1">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-slate-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
+                </svg>
+            </div>
+            <span class="font-bold text-sm tracking-wide" x-text="toastMessage"></span>
+        </div>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                tab: 'initiative',
+                showAddMonsterModal: false, // Must be here
+                showAddPlayerModal: false,  // Must be here
+                searchQuery: '',
+                loading: false,
+                searchResults: [],
+                database: [], // Monster DB
+                playerDb: [], // Player DB
+                monsterLibrary: [],
+                newPlayerName: '',
+                newPlayerHp: '', // New
+                newPlayerAc: '', // New
+                initiativeList: [],
+                openDetail: null,
+                instanceTracker: {},
+                activeTurnIndex: null,
+                showSummary: false,
+                toastMessage: '',
+                showToast: false,
+                importError: '',
+                sourceBooks: ['mm', 'mpmm', 'bgg'],
+                newSourceBook: '',
+
+                async init() {
+                    const savedMonsters = localStorage.getItem('dnd_monsters_v2');
+                    if (savedMonsters) this.database = JSON.parse(savedMonsters);
+                    
+                    const savedPlayers = localStorage.getItem('dnd_players_v1');
+                    if (savedPlayers) this.playerDb = JSON.parse(savedPlayers);
+
+                    const savedSources = localStorage.getItem('dnd_sources_v1');
+                    if (savedSources) this.sourceBooks = JSON.parse(savedSources);
+                    
+                    // Load the big library from IndexedDB (Persistent storage)
+                    await this.loadLibraryFromCache();
+                },
+                
+                async loadLibraryFromCache() {
+                    const cached = localStorage.getItem('monster_library_cache');
+                    if (cached) {
+                        this.monsterLibrary = JSON.parse(cached);
+                    }
+                },
+
+                async refreshLibrary() {
+                    this.loading = true;
+                    const urls = this.sourceBooks;
+                    let combined = [];
+
+                    try {
+                        const responses = await Promise.all(urls.map(url => 
+                            fetch('https://raw.githubusercontent.com/5etools-mirror-3/5etools-src/main/data/bestiary/bestiary-' + url + '.json')
+                        ));
+                        const dataFiles = await Promise.all(responses.map(res => res.json()));
+
+                        dataFiles.forEach(data => {
+                            if (data.monster) {
+                                combined = [...combined, ...data.monster];
+                            }
+                        });
+
+                        this.monsterLibrary = combined;
+                        // Note: If this exceeds 5MB, consider using IndexedDB instead of localStorage
+                        localStorage.setItem('monster_library_cache', JSON.stringify(this.monsterLibrary));
+                        alert(`Library updated! ${this.monsterLibrary.length} monsters cached.`);
+                    } catch (e) {
+                        console.error(e);
+                        alert("Failed to refresh library.");
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                
+                clearAllData() {
+                    const confirm1 = confirm("⚠️ WARNING: This will delete YOUR SAVED MONSTERS, PLAYERS, and the CACHED LIBRARY. Are you sure?");
+                    if (confirm1) {
+                        localStorage.clear();
+                        this.database = [];
+                        this.playerDb = [];
+                        this.monsterLibrary = [];
+                        this.initiativeList = [];
+                        this.instanceTracker = {};
+                        alert("All data cleared successfully.");
+                        window.location.reload(); // Hard reset to be safe
+                    }
+                },
+
+                async searchMonster() {
+                    if (this.searchQuery.length < 2) return;
+
+                    // Check if library is empty
+                    if (this.monsterLibrary.length === 0) {
+                        if(confirm("Library is empty. Download monster data now?")) {
+                            this.refreshLibrary();
+                        }
+                        return;
+                    }
+
+                    this.searchResults = []; 
+
+                    try {
+
+                        const query = this.searchQuery.toLowerCase();
+                        let combinedMatches = [];
+
+                        // Search the LOCAL monsterLibrary array instead of fetching
+                        const matches = this.monsterLibrary.filter(m => {
+                            const nameMatch = m.name.toLowerCase().includes(query);
+                            // let reprintMatch = false;
+                            // if (m.reprintedAs && Array.isArray(m.reprintedAs)) {
+                            //     reprintMatch = m.reprintedAs.some(oldName => oldName.toLowerCase().includes(query));
+                            // }
+                            return nameMatch;// || reprintMatch;
+                        });
+
+                        // Map the combined results for your UI
+                        this.searchResults = matches.map(m => {
+                            // const cleanName = (m.reprintedAs && m.reprintedAs.length > 0) 
+                            //     ? m.reprintedAs[0].split('|')[0].trim()
+                            //     : m.name;
+
+                            const cleanName = m.name;
+                            
+                            return {
+                                ...m,
+                                name: cleanName,
+                                former: m.name,
+                                slug: `${cleanName}-${m.source}`.toLowerCase().replace(/\s+/g, '-'),
+                                document__title: m.source,
+                                challenge_rating: m.cr?.cr || m.cr || "0",
+                                type: m.type?.type || m.type || "unknown"
+                            };
+                        });
+
+                        if (this.searchResults.length === 0) {
+                            alert("No monsters found in these books.");
+                        }
+                    } catch (e) {
+                        console.error("Fetch Error:", e);
+                        alert("Error loading monster data.");
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+
+                saveToDb(monster) {
+                    if (this.database.find(d => d.slug === monster.slug)) {
+                        alert("Already in your library");
+                        return;
+                    }
+
+                    // Handle 5eTools AC (it's often an array: [{ac: 15, from: ['armor']}])
+                    const acValue = Array.isArray(monster.ac) 
+                        ? (monster.ac[0].ac || monster.ac[0]) 
+                        : (monster.ac?.ac || monster.ac || 10);
+
+                    // Handle 5eTools HP (it's an object: {average: 7, formula: '2d6'})
+                    const hpValue = monster.hp?.average || monster.hp || 0;
+
+                    // FIX: Extract the string from the Type object
+                    const typeValue = monster.type?.type || monster.type || "unknown";
+
+                    this.database.push({
+                        slug: monster.slug,
+                        name: monster.name,
+                        type: typeValue, // Updated to save the string, not the object
+                        source: monster.source,
+                        ac: acValue,
+                        hp: hpValue,
+                        dex: monster.dex || 10,
+                        cr: monster.challenge_rating || (monster.cr?.cr || monster.cr || "0"),
+                        stats: monster 
+                    });
+
+                    this.database.sort((a, b) => a.name.localeCompare(b.name));
+                    this.saveLocalStorage('monster');
+                    this.searchResults = [];
+                    this.searchQuery = '';
+                },
+
+                addPlayerToDb() {
+                    if (this.newPlayerName.trim() === '') return;
+    
+                    this.playerDb.push({
+                        id: Date.now(),
+                        name: this.newPlayerName,
+                        hp: parseInt(this.newPlayerHp) || 0,
+                        ac: parseInt(this.newPlayerAc) || 10
+                    });
+                    
+                    // Reset inputs
+                    this.newPlayerName = '';
+                    this.newPlayerHp = '';
+                    this.newPlayerAc = '';
+                    
+                    this.playerDb.sort((a, b) => a.name.localeCompare(b.name));
+                    this.saveLocalStorage('player');
+                    this.notify("Player added to Party!");
+                },
+
+                deletePlayer(id) {
+                    this.playerDb = this.playerDb.filter(p => p.id !== id);
+                    this.saveLocalStorage('player');
+                },
+
+                saveLocalStorage(type) {
+                    if (type === 'monster') localStorage.setItem('dnd_monsters_v2', JSON.stringify(this.database));
+                    if (type === 'player') localStorage.setItem('dnd_players_v1', JSON.stringify(this.playerDb));
+                    if (type === 'sources') localStorage.setItem('dnd_sources_v1', JSON.stringify(this.sourceBooks));
+                },
+
+                deleteFromDb(slug) {
+                    this.database = this.database.filter(d => d.slug !== slug);
+                    this.saveLocalStorage('monster');
+                },
+
+                addToInitiative(monster) {
+                    if (!this.instanceTracker[monster.name]) {
+                        this.instanceTracker[monster.name] = [];
+                    }
+                    
+                    let num = 1;
+                    while (this.instanceTracker[monster.name].includes(num)) {
+                        num++;
+                    }
+                    this.instanceTracker[monster.name].push(num);
+
+                    const dexMod = Math.floor((monster.dex - 10) / 2);
+                    const roll = Math.floor(Math.random() * 20) + 1;
+                    const finalInit = roll + dexMod;
+
+                    this.initiativeList.push({
+                        id: Date.now() + Math.random(),
+                        name: monster.name,
+                        instanceNum: num,
+                        displayName: `${monster.name} ${num}`,
+                        ac: monster.ac,
+                        maxHp: monster.hp, // Store original max
+                        currentHp: monster.hp, // Initialize current HP
+                        init: finalInit,
+                        stats: monster.stats,
+                        isPlayer: false
+                    });
+
+                    this.notify(`${monster.name} ${num} added at initiative ${finalInit}`);
+                    this.initiativeList.sort((a, b) => b.init - a.init);
+                },
+                
+                applyChange(entity, type, target) {
+                    const input = document.getElementById('hp-change-' + entity.id);
+                    const val = parseInt(input.value) || 0;
+                    if (val === 0) return;
+
+                    if (type === 'dmg') {
+                        // DAMAGE LOGIC: Always reduce Temp HP first
+                        let remainingDmg = val;
+                        if (entity.tempHp > 0) {
+                            const absorbed = Math.min(entity.tempHp, remainingDmg);
+                            entity.tempHp -= absorbed;
+                            remainingDmg -= absorbed;
+                        }
+                        entity.currentHp = Math.max(0, entity.currentHp - remainingDmg);
+                    } else {
+                        // HEAL/ADD LOGIC: Depends on what is selected
+                        if (target === 'temp') {
+                            entity.tempHp = (entity.tempHp || 0) + val;
+                        } else {
+                            entity.currentHp = Math.min(entity.maxHp, entity.currentHp + val);
+                        }
+                    }
+                    input.value = ''; // Reset input
+                },
+
+                addPlayerToInitiative(player) {
+                    const initInput = document.getElementById('init-' + player.id);
+                    const finalInit = parseInt(initInput.value) || 0;
+
+                    this.initiativeList.push({
+                        id: Date.now() + Math.random(),
+                        name: player.name,
+                        displayName: player.name,
+                        init: finalInit,
+                        isPlayer: true,
+                        currentHp: player.hp,
+                        maxHp: player.hp,
+                        ac: player.ac,
+                        tempHp: 0,
+                        stats: {} // Empty stats for players
+                    });
+
+                    this.initiativeList.sort((a, b) => b.init - a.init);
+                    initInput.value = ''; // Reset the init input field
+                    this.showAddPlayerModal = false;
+                    this.notify(`${entity.name} joined the fray! (at initiative ${finalInit})`);
+                },
+
+                removeFromInitiative(index, name, num, isPlayer) {
+                    this.initiativeList.splice(index, 1);
+                    if (!isPlayer && this.instanceTracker[name]) {
+                        this.instanceTracker[name] = this.instanceTracker[name].filter(n => n !== num);
+                    }
+                },
+
+                toggleDetails(id) {
+                    this.openDetail = this.openDetail === id ? null : id;
+                },
+
+                format5e(entries) {
+                    if (!entries || !Array.isArray(entries)) return "";
+                    
+                    // Join the array into one string first
+                    let text = entries.join(" ");
+
+                    return text
+                        // Attacks: {@atk mw} -> Melee Weapon Attack:
+                        .replace(/\{@atk mw\}/g, "<i>Melee Weapon Attack:</i>")
+                        .replace(/\{@atk rw\}/g, "<i>Ranged Weapon Attack:</i>")
+                        // To Hit: {@hit 4} -> +4
+                        .replace(/\{@hit (.*?)\}/g, "+$1")
+                        // Hit: {@h} -> Hit:
+                        .replace(/\{@h\}/g, "<b>Hit:</b> ")
+                        // Damage/Dice: {@damage 1d6 + 2} -> 1d6 + 2
+                        .replace(/\{@damage (.*?)\}/g, "<b>$1</b>")
+                        .replace(/\{@dice (.*?)\}/g, "<b>$1</b>")
+                        // Recharge: {@recharge 5} -> (Recharge 5-6)
+                        .replace(/\{@recharge (.*?)\}/g, "(Recharge $1–6)")
+                        // Cleanup: remove any remaining tags like {@ability ...} or {@creature ...}
+                        .replace(/\{@\w+ (.*?)\}/g, "$1");
+                },
+
+                nextTurn() {
+                    if (this.initiativeList.length === 0) return;
+                    
+                    if (this.activeTurnIndex === null || this.activeTurnIndex >= this.initiativeList.length - 1) {
+                        this.activeTurnIndex = 0;
+                    } else {
+                        this.activeTurnIndex++;
+                    }
+                    
+                    // Optional: Scroll the active entity into view
+                    const activeId = this.initiativeList[this.activeTurnIndex].id;
+                    document.getElementById('entity-' + activeId)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                },
+
+                // Update your Clear Combat logic to also reset the turn
+                clearCombat() {
+                    this.initiativeList = [];
+                    this.instanceTracker = {};
+                    this.activeTurnIndex = null;
+                },
+
+                get monsterSummary() {
+                    const counts = {};
+                    this.initiativeList.forEach(entity => {
+                        if (!entity.isPlayer) {
+                            counts[entity.name] = (counts[entity.name] || 0) + 1;
+                        }
+                    });
+                    // Convert object to array: [{name: 'Goblin', count: 3}, ...]
+                    return Object.entries(counts).map(([name, count]) => ({ name, count }));
+                },
+
+                // Add these methods
+                addSourceBook() {
+                    const code = this.newSourceBook.trim().toLowerCase();
+                    if (code && !this.sourceBooks.includes(code)) {
+                        this.sourceBooks.push(code);
+                        this.saveLocalStorage('sources');
+                        this.newSourceBook = '';
+                        this.notify(`Added source: ${code}`);
+                    }
+                },
+
+                removeSourceBook(index) {
+                    const removed = this.sourceBooks.splice(index, 1);
+                    this.saveLocalStorage('sources');
+                    this.notify(`Removed source: ${removed}`);
+                },
+
+                notify(message) {
+                    this.toastMessage = message;
+                    this.showToast = true;
+                    // Auto-hide after 3 seconds
+                    setTimeout(() => {
+                        this.showToast = false;
+                    }, 3000);
+                },
+
+                exportData() {
+                    const data = {
+                        monsters: JSON.parse(localStorage.getItem('dnd_monsters_v2') || '[]'),
+                        players: JSON.parse(localStorage.getItem('dnd_players_v1') || '[]'),
+                        sources: JSON.parse(localStorage.getItem('dnd_sources_v1') || '[]'),
+                        initiative: this.initiativeList,
+                        instances: this.instanceTracker
+                    };
+                    
+                    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement('a');
+                    link.href = url;
+                    link.download = `dnd-tracker-backup-${new Date().toISOString().split('T')[0]}.json`;
+                    link.click();
+                    URL.revokeObjectURL(url);
+                    this.notify("Data exported successfully!");
+                },
+
+                importData(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        try {
+                            const data = JSON.parse(e.target.result);
+                            
+                            // Validate basic structure
+                            if (!data.monsters || !data.players) throw new Error("Invalid file format");
+
+                            if (confirm("This will overwrite your current data. Continue?")) {
+                                // Update LocalStorage
+                                localStorage.setItem('dnd_monsters_v2', JSON.stringify(data.monsters));
+                                localStorage.setItem('dnd_players_v1', JSON.stringify(data.players));
+                                localStorage.setItem('dnd_sources_v1', JSON.stringify(data.sources));
+                                
+                                // Update App State
+                                this.database = data.monsters;
+                                this.playerDb = data.players;
+                                this.sourceBooks = data.sources || ['mm', 'mpmm', 'bgg'];
+                                this.initiativeList = data.initiative || [];
+                                this.instanceTracker = data.instances || {};
+                                
+                                this.notify("Data imported successfully!");
+                                this.tab = 'initiative'; // Take user back to main screen
+                            }
+                        } catch (err) {
+                            this.importError = "Failed to import: " + err.message;
+                            this.notify("Import Error!");
+                        }
+                    };
+                    reader.readAsText(file);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
