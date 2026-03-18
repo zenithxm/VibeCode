@@ -190,87 +190,129 @@
                             </div>
                         </div>
 
-                        
-                        <div x-show="openDetail === entity.id && !entity.isPlayer" class="p-5 stat-block text-slate-900 text-sm border-t-4 border-orange-800 mx-2 mb-2 shadow-inner">
-                            <div class="flex justify-between items-start border-b-2 border-orange-900 pb-1 mb-1">
-                                <div>
-                                    <h3 class="text-xl font-black text-orange-900 uppercase leading-none" x-text="entity.name"></h3>
-                                    <p class="text-[10px] text-orange-800 font-bold uppercase" x-text="entity.stats.document__title"></p>
-                                    <p class="italic text-xs" x-text="entity.stats.size + ' - ' + entity.stats.type + ' - ' + entity.stats.alignment"></p>
-                                </div>
-                                <div class="text-right">
-                                    <span class="text-xs font-bold uppercase">CR</span>
-                                    <div class="text-lg font-black text-orange-900 leading-none" x-text="entity.stats.challenge_rating"></div>
-                                </div>
+                        <div x-show="openDetail === entity.id && !entity.isPlayer" 
+                            class="p-5 stat-block text-slate-900 text-sm border-t-4 border-orange-800 mx-2 mb-2 shadow-inner bg-[#fdf1dc]">
+                            
+                            <div class="border-b-2 border-orange-900 pb-1 mb-1">
+                                <h3 class="text-2xl font-black text-orange-900 uppercase font-serif" x-text="entity.name"></h3>
+                                <p class="italic text-xs" x-text="entity.stats.size + ' ' + (entity.stats.type?.type || entity.stats.type) + (entity.stats.alignment ? ', ' + entity.stats.alignment.join(', ') : '')"></p>
                             </div>
                             
-                            <div class="space-y-1">
-                                <p><strong class="text-orange-900">Armor Class</strong> <span x-text="entity.ac"></span></p>
-                                <p><strong class="text-orange-900">Hit Points</strong> <span x-text="entity.hp"></span></p>
+                            <div class="space-y-0.5 text-xs text-orange-900">
+                                <p><strong>Armor Class</strong> <span class="text-slate-900" x-text="entity.ac"></span></p>
+                                <p><strong>Hit Points</strong> <span class="text-slate-900" x-text="entity.maxHp + (entity.stats.hp?.formula ? ' (' + entity.stats.hp.formula + ')' : '')"></span></p>
+                                <p><strong>Speed</strong> <span class="text-slate-900" x-text="entity.speed"></span></p>
                             </div>
                             
-                            <hr class="border-orange-900 my-2 opacity-30">
+                            <hr class="border-orange-900 my-2 opacity-40">
                             
-                            <div class="grid grid-cols-6 gap-1 text-center">
+                            <div class="grid grid-cols-6 gap-1 text-center mb-2">
                                 <template x-for="stat in ['str','dex','con','int','wis','cha']" :key="stat">
-                                    <div class="text-center">
+                                    <div>
                                         <div class="font-bold text-[10px] uppercase text-orange-900" x-text="stat"></div>
-                                        <div class="font-bold text-sm flex flex-col">
-                                            <span x-text="`${(Math.floor(((entity.stats[stat] || 10) - 10) / 2) >= 0 ? '+' : '')}${Math.floor(((entity.stats[stat] || 10) - 10) / 2)}`"></span>
-                                            
-                                            <span class="text-[9px] text-slate-500" x-text="entity.stats[stat] || 10"></span>
+                                        <div class="font-bold text-sm text-slate-900">
+                                            <span x-text="(entity.stats[stat] || 10)"></span>
+                                            <span class="text-[10px]" x-text="'(' + (Math.floor(((entity.stats[stat] || 10) - 10) / 2) >= 0 ? '+' : '') + Math.floor(((entity.stats[stat] || 10) - 10) / 2) + ')'"></span>
                                         </div>
                                     </div>
                                 </template>
                             </div>
+
+                            <hr class="border-orange-900 my-2 opacity-40">
+
+                            <div class="space-y-0.5 text-xs text-orange-900">
+                                <template x-if="entity.stats.save">
+                                    <p><strong>Saving Throws</strong> <span class="text-slate-900" x-text="Object.entries(entity.stats.save).map(([k,v]) => k.toUpperCase() + ' ' + v).join(', ')"></span></p>
+                                </template>
+                                <template x-if="entity.stats.skill">
+                                    <p><strong>Skills</strong> <span class="text-slate-900" x-text="Object.entries(entity.stats.skill).map(([k,v]) => k.charAt(0).toUpperCase() + k.slice(1) + ' ' + v).join(', ')"></span></p>
+                                </template>
+                                <template x-if="entity.stats.vulStr">
+                                    <p><strong>Vulnerabilities</strong> <span class="text-slate-900" x-text="entity.stats.vulStr"></span></p>
+                                </template>
+                                <template x-if="entity.stats.resStr">
+                                    <p><strong>Resistances</strong> <span class="text-slate-900" x-text="entity.stats.resStr"></span></p>
+                                </template>
+                                <template x-if="entity.stats.immStr">
+                                    <p><strong>Immunities</strong> <span class="text-slate-900" x-text="entity.stats.immStr"></span></p>
+                                </template>
+                                <template x-if="entity.stats.conImmStr">
+                                    <p><strong>Condition Immunities</strong> <span class="text-slate-900" x-text="entity.stats.conImmStr"></span></p>
+                                </template>
+                                <p><strong>Senses</strong> <span class="text-slate-900" x-text="entity.stats.senses ? entity.stats.senses.join(', ') : 'passive Perception ' + (10 + Math.floor(((entity.stats.wis || 10) - 10) / 2))"></span></p>
+                                <p><strong>Languages</strong> <span class="text-slate-900" x-text="entity.stats.languages ? entity.stats.languages.join(', ') : '—'"></span></p>
+                                <p><strong>Challenge</strong> <span class="text-slate-900" x-text="entity.cr"></span></p>
+                            </div>
                             
-                            <hr class="border-orange-900 my-2 opacity-30">
+                            <hr class="border-orange-900 border-b-2 my-2">
 
                             <template x-if="entity.stats.trait">
                                 <div class="mt-2">
                                     <template x-for="trait in entity.stats.trait" :key="trait.name">
-                                        <div class="mb-3 text-xs leading-normal text-slate-900">
+                                        <div class="mb-2 text-xs">
                                             <strong class="italic font-bold" x-text="trait.name + '.'"></strong>
-                                            <span x-html="trait.entries ? format5e(trait.entries) : ''"></span>
+                                            <span class="text-slate-800" x-html="trait.entries"></span>
                                         </div>
                                     </template>
                                 </div>
                             </template>
 
-                            <template x-if="entity.stats.action">
-                                <div class="mt-4">
-                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Actions</h4>
-                                    <template x-for="act in entity.stats.action" :key="act.name">
-                                        <div class="mb-3 text-xs leading-normal text-slate-900">
-                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
-                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
+                            <template x-if="entity.stats.spellcasting && entity.stats.spellcasting.length > 0">
+                                <div class="mt-2 space-y-2">
+                                    <template x-for="sc in entity.stats.spellcasting" :key="sc.name">
+                                        <div class="text-xs text-slate-800">
+                                            <div class="mb-1">
+                                                <strong class="italic font-bold" x-text="sc.name + '.'"></strong>
+                                                <span x-html="sc.headerEntries"></span>
+                                            </div>
+
+                                            <template x-if="sc.will">
+                                                <div class="ml-2">
+                                                    <span class="font-bold text-slate-900">At will: </span>
+                                                    <span class="italic" x-html="sc.will"></span>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="sc.daily">
+                                                <div class="ml-2">
+                                                    <template x-for="(spells, freq) in sc.daily" :key="freq">
+                                                        <div>
+                                                            <span class="font-bold text-slate-900" x-text="freq.replace('e', '') + '/day each: '"></span>
+                                                            <span class="italic" x-html="spells"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
+
+                                            <template x-if="sc.spells">
+                                                <div class="ml-2">
+                                                    <template x-for="(levelData, level) in sc.spells" :key="level">
+                                                        <div>
+                                                            <span class="font-bold text-slate-900" 
+                                                                x-text="level === '0' ? 'Cantrips (at will): ' : 'Level ' + level + ' (' + (levelData.slots || 0) + ' slots): '">
+                                                            </span>
+                                                            <span class="italic" x-html="levelData.spells"></span>
+                                                        </div>
+                                                    </template>
+                                                </div>
+                                            </template>
                                         </div>
                                     </template>
                                 </div>
                             </template>
 
-                            <template x-if="entity.stats.bonus">
-                                <div class="mt-4">
-                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Bonus Actions</h4>
-                                    <template x-for="act in entity.stats.bonus" :key="act.name">
-                                        <div class="mb-3 text-xs leading-normal text-slate-900">
-                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
-                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
-                                        </div>
-                                    </template>
-                                </div>
-                            </template>
-
-                            <template x-if="entity.stats.reaction">
-                                <div class="mt-4">
-                                    <h4 class="border-b border-orange-900 font-bold uppercase text-[10px] text-orange-900 mb-2 font-serif">Reactions</h4>
-                                    <template x-for="act in entity.stats.reaction" :key="act.name">
-                                        <div class="mb-3 text-xs leading-normal text-slate-900">
-                                            <strong class="italic font-bold" x-text="act.name + '.'"></strong>
-                                            <span x-html="act.entries ? format5e(act.entries) : ''"></span>
-                                        </div>
-                                    </template>
-                                </div>
+                            <template x-for="group in [{k:'action', n:'Actions'}, {k:'bonus', n:'Bonus Actions'}, {k:'reaction', n:'Reactions'}, {k:'legendary', n:'Legendary Actions'}]" :key="group.k">
+                                <template x-if="entity.stats[group.k]">
+                                    <div class="mt-4">
+                                        <h4 class="border-b border-orange-900 font-bold uppercase text-sm text-orange-900 mb-1 font-serif" x-text="group.n"></h4>
+                                        <template x-for="item in entity.stats[group.k]" :key="item.name">
+                                            <div class="mb-2 text-xs">
+                                                <strong class="italic font-bold" x-text="item.name + '.'"></strong>
+                                                <span class="text-slate-800" x-html="item.entries"></span>
+                                            </div>
+                                        </template>
+                                    </div>
+                                </template>
                             </template>
                         </div>
                     </div>
@@ -338,6 +380,10 @@
                     </button>
                 </div>
             </div>
+            
+                <button @click="showCustomModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 flex items-center justify-center gap-2">
+                    <span class="text-lg">+</span> Create Custom Monster
+                </button>
             
             <div class="flex gap-2 mb-2">
                 <input type="text" x-model="searchQuery" @keyup.enter="searchMonster()" 
@@ -514,6 +560,80 @@
         </div>
     </div>
 
+    <div x-show="showCustomModal" x-cloak class="fixed inset-0 z-[100] bg-slate-900/95 flex items-center justify-center p-2">
+        <div class="bg-slate-800 w-full max-w-2xl rounded-xl border border-slate-700 p-4 max-h-[95vh] overflow-y-auto no-scrollbar">
+            <div class="flex justify-between items-center mb-4 sticky top-0 bg-slate-800 py-2 z-10 border-b border-slate-700">
+                <h2 class="text-xl font-bold text-orange-400">Add Custom Monster</h2>
+                <button @click="showCustomModal = false" class="text-slate-400 text-2xl">&times;</button>
+            </div>
+
+            <div class="space-y-4 pb-6">
+                <div class="grid grid-cols-2 gap-2">
+                    <input type="text" x-model="customM.name" placeholder="Name" class="w-full bg-slate-700 rounded p-2 text-sm">
+                    <input type="text" x-model="customM.type" placeholder="Type (Humanoid, etc)" class="w-full bg-slate-700 rounded p-2 text-sm">
+                </div>
+
+                <div class="grid grid-cols-4 gap-2">
+                    <div class="text-center"><label class="text-[10px] text-slate-400 uppercase">AC</label><input type="number" x-model.number="customM.ac" class="w-full bg-slate-700 rounded p-1 text-center"></div>
+                    <div class="text-center"><label class="text-[10px] text-slate-400 uppercase">HP</label><input type="number" x-model.number="customM.hp" class="w-full bg-slate-700 rounded p-1 text-center"></div>
+                    <div class="text-center"><label class="text-[10px] text-slate-400 uppercase">Speed</label><input type="text" x-model="customM.speed" class="w-full bg-slate-700 rounded p-1 text-center"></div>
+                    <div class="text-center"><label class="text-[10px] text-slate-400 uppercase">CR</label><input type="number" x-model.number="customM.cr" class="w-full bg-slate-700 rounded p-1 text-center"></div>
+                </div>
+
+                <div class="grid grid-cols-6 gap-1 bg-slate-900/50 p-2 rounded">
+                    <template x-for="s in ['str','dex','con','int','wis','cha']">
+                        <div>
+                            <label class="block text-[10px] uppercase text-slate-500 text-center" x-text="s"></label>
+                            <input type="number" x-model.number="customM[s]" class="w-full bg-transparent text-center font-bold">
+                        </div>
+                    </template>
+                </div>
+
+                <div class="space-y-2">
+                    <input type="text" x-model="customM.skills" placeholder="Skills (Athletics +4, Deception +4)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" x-model="customM.resStr" placeholder="Resistances (Fire, Cold)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                        <input type="text" x-model="customM.immStr" placeholder="Immunities (Poison)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2 mt-2">
+                        <input type="text" x-model="customM.vulStr" placeholder="Vulnerabilities" class="w-full bg-slate-700 rounded p-2 text-xs">
+                        <input type="text" x-model="customM.conImmStr" placeholder="Condition Immunities (Charmed)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" x-model="customM.senses" placeholder="Senses (Darkvision 60ft)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                        <input type="text" x-model="customM.languages" placeholder="Languages (Common)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    </div>
+                </div>
+
+                <div class="p-2 bg-blue-900/20 border border-blue-800/50 rounded space-y-2">
+                    <div class="flex gap-2">
+                        <input type="text" x-model="customM.spellAbility" placeholder="Ability (INT)" class="w-1/2 bg-slate-700 rounded p-1 text-xs">
+                        <input type="number" x-model="customM.spellSave" placeholder="DC" class="w-1/2 bg-slate-700 rounded p-1 text-xs">
+                    </div>
+                    <input type="text" x-model="customM.spellAtWill" placeholder="At Will (light, mage hand)" class="w-full bg-slate-700 rounded p-1 text-xs">
+                    <div class="grid grid-cols-3 gap-1">
+                        <input type="text" x-model="customM.spell3Day" placeholder="3/day" class="bg-slate-700 rounded p-1 text-xs">
+                        <input type="text" x-model="customM.spell2Day" placeholder="2/day" class="bg-slate-700 rounded p-1 text-xs">
+                        <input type="text" x-model="customM.spell1Day" placeholder="1/day" class="bg-slate-700 rounded p-1 text-xs">
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-[10px] text-slate-500 uppercase">Traits / Actions (Name: Description)</label>
+                    <textarea x-model="customM.rawTraits" placeholder="Trait Name: Description..." class="w-full bg-slate-700 rounded p-2 text-xs h-16"></textarea>
+                    <textarea x-model="customM.rawActions" placeholder="Action Name: Description..." class="w-full bg-slate-700 rounded p-2 text-xs h-16"></textarea>
+                    <textarea x-model="customM.rawBonus" placeholder="Bonus Action Name: Description..." class="w-full bg-slate-700 rounded p-2 text-xs h-12"></textarea>
+                    <textarea x-model="customM.rawReactions" placeholder="Reaction Name: Description..." class="w-full bg-slate-700 rounded p-2 text-xs h-12"></textarea>
+                    <textarea x-model="customM.rawLegendary" placeholder="Legendary Action: Description..." class="w-full bg-slate-700 rounded p-2 text-xs h-12"></textarea>
+                </div>
+
+                <button @click="saveCustomMonster()" class="w-full bg-green-600 py-3 rounded-lg font-bold shadow-lg shadow-green-900/20">
+                    Save Monster to Library
+                </button>
+            </div>
+        </div>
+    </div>
+
     <div x-show="showToast" 
         x-transition:enter="transition ease-out duration-300"
         x-transition:enter-start="opacity-0 translate-y-10"
@@ -558,6 +678,16 @@
                 importError: '',
                 sourceBooks: ['xmm', 'mpmm', 'bgg'],
                 newSourceBook: '',
+                showCustomModal: false,
+                customM: {
+                    name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1',
+                    str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
+                    skills: '', senses: '', languages: '',
+                    spellAbility: 'INT', spellSave: 12,
+                    spellAtWill: '', spell1Day: '', spell2Day: '', spell3Day: '',
+                    rawTraits: '', rawActions: '', rawBonus: '', rawReactions: '', rawLegendary: '',
+                    resStr: '', immStr: '', vulStr: '', conImmStr: ''
+                },
 
                 async init() {
                     const savedMonsters = localStorage.getItem('dnd_monsters_v2');
@@ -687,33 +817,175 @@
                         return;
                     }
 
-                    // Handle 5eTools AC (it's often an array: [{ac: 15, from: ['armor']}])
-                    const acValue = Array.isArray(monster.ac) 
-                        ? (monster.ac[0].ac || monster.ac[0]) 
-                        : (monster.ac?.ac || monster.ac || 10);
+                    const cleanMonster = Alpine.raw(monster);
+                    const acValue = Array.isArray(cleanMonster.ac) 
+                            ? (cleanMonster.ac[0].ac || cleanMonster.ac[0]) 
+                            : (cleanMonster.ac?.ac || cleanMonster.ac || 10);
+                    let speedParts = [];
+                    if (cleanMonster.speed) {
+                        if (typeof cleanMonster.speed === 'string') {
+                            speedParts.push(cleanMonster.speed);
+                        } else {
+                            Object.entries(cleanMonster.speed).forEach(([type, val]) => {
+                                const num = typeof val === 'object' ? val.number : val;
+                                speedParts.push(`${type} ${num} ft.`);
+                            });
+                        }
+                    }
+                    const speedStr = speedParts.length > 0 ? speedParts.join(', ') : '30 ft.';
+                    const crValue = cleanMonster.cr?.cr || cleanMonster.cr || "0";
 
-                    // Handle 5eTools HP (it's an object: {average: 7, formula: '2d6'})
-                    const hpValue = monster.hp?.average || monster.hp || 0;
+                    // Pre-format all text entries using your format5e logic
+                    const sections = ['trait', 'action', 'bonus', 'reaction', 'legendary'];
+                    sections.forEach(section => {
+                        if (cleanMonster[section] && Array.isArray(cleanMonster[section])) {
+                            cleanMonster[section].forEach(item => {
+                                if (item.entries) {
+                                    item.entries = this.format5e(item.entries);
+                                }
+                                if (item.name) {
+                                    item.name = this.format5e(item.name);
+                                }
+                            });
+                        }
+                    });
+                    if (cleanMonster.spellcasting) {
+                        cleanMonster.spellcasting.forEach(sc => {
+                            if (sc.headerEntries) sc.headerEntries = this.format5e(sc.headerEntries);
+                            if (sc.footerEntries) sc.footerEntries = this.format5e(sc.footerEntries);
+                        });
+                    }
 
-                    // FIX: Extract the string from the Type object
-                    const typeValue = monster.type?.type || monster.type || "unknown";
+                    if (cleanMonster.spellcasting && Array.isArray(cleanMonster.spellcasting)) {
+                        cleanMonster.spellcasting.forEach(sc => {
+                            // 1. Format Header and Footer text
+                            if (sc.headerEntries) sc.headerEntries = this.format5e(sc.headerEntries);
+                            if (sc.footerEntries) sc.footerEntries = this.format5e(sc.footerEntries);
+
+                            // Format and Join "At Will"
+                            if (sc.will) {
+                                // Map through each spell, format it, then join
+                                sc.will = sc.will.map(s => this.format5e(s)).join(', ');
+                            }
+
+                            // Format and Join "Daily"
+                            if (sc.daily) {
+                                Object.keys(sc.daily).forEach(freq => {
+                                    sc.daily[freq] = sc.daily[freq].map(s => this.format5e(s)).join(', ');
+                                });
+                            }
+                            
+                            // Format and Join "Leveled Spells"
+                            if (sc.spells) {
+                                Object.keys(sc.spells).forEach(level => {
+                                    sc.spells[level].spells = sc.spells[level].spells.map(s => this.format5e(s)).join(', ');
+                                });
+                            }
+                        });
+                    }
+
+                    cleanMonster.resStr = this.formatDamage(cleanMonster.res || cleanMonster.resist);
+                    cleanMonster.immStr = this.formatDamage(cleanMonster.immune);
+                    cleanMonster.vulStr = this.formatDamage(cleanMonster.vulnerable);
+                    cleanMonster.conImmStr = this.formatDamage(cleanMonster.conditionImmune);
 
                     this.database.push({
-                        slug: monster.slug,
-                        name: monster.name,
-                        type: typeValue, // Updated to save the string, not the object
-                        source: monster.source,
+                        slug: cleanMonster.slug,
+                        name: cleanMonster.name,
+                        type: cleanMonster.type?.type || cleanMonster.type || "unknown",
+                        source: cleanMonster.source,
                         ac: acValue,
-                        hp: hpValue,
-                        dex: monster.dex || 10,
-                        cr: monster.challenge_rating || (monster.cr?.cr || monster.cr || "0"),
-                        stats: monster 
+                        hp: cleanMonster.hp?.average || cleanMonster.hp || 0,
+                        speed: speedStr, // Save the fixed string
+                        dex: cleanMonster.dex || 10,
+                        cr: crValue,     // Save the fixed string
+                        resStr: cleanMonster.resStr,
+                        immStr: cleanMonster.immStr,
+                        vulStr: cleanMonster.vulStr,
+                        conImmStr: cleanMonster.conImmStr,
+                        stats: cleanMonster
                     });
 
                     this.database.sort((a, b) => a.name.localeCompare(b.name));
                     this.saveLocalStorage('monster');
                     this.searchResults = [];
                     this.searchQuery = '';
+                },
+
+                saveCustomMonster() {
+                    if(!this.customM.name) return alert("Monster needs a name!");
+
+                    // Helper to format "Name: Text" into the structure the UI expects
+                    const parseEntries = (text) => {
+                        if (!text) return [];
+                        return text.split('\n').filter(l => l.includes(':')).map(line => {
+                            const [name, ...desc] = line.split(':');
+                            return { 
+                                name: name.trim(), 
+                                // We wrap in array to match 5e tools format
+                                entries: [desc.join(':').trim()] 
+                            };
+                        });
+                    };
+
+                    // Construct Innate Spellcasting
+                    let spellcasting = [];
+                    if (this.customM.spellAtWill || this.customM.spell1Day || this.customM.spell2Day || this.customM.spell3Day) {
+                        let innate = {
+                            name: "Innate Spellcasting",
+                            headerEntries: [`The ${this.customM.name}'s innate spellcasting ability is ${this.customM.spellAbility} (spell save DC ${this.customM.spellSave}). It can innately cast the following spells:`],
+                            will: this.customM.spellAtWill ? this.customM.spellAtWill.split(',').map(s => s.trim()) : [],
+                            daily: {}
+                        };
+                        if (this.customM.spell3Day) innate.daily["3e"] = this.customM.spell3Day.split(',').map(s => s.trim());
+                        if (this.customM.spell2Day) innate.daily["2e"] = this.customM.spell2Day.split(',').map(s => s.trim());
+                        if (this.customM.spell1Day) innate.daily["1e"] = this.customM.spell1Day.split(',').map(s => s.trim());
+                        spellcasting.push(innate);
+                    }
+
+                    const newMonster = {
+                        slug: 'custom-' + Date.now(),
+                        name: this.customM.name,
+                        type: this.customM.type || "unknown",
+                        source: 'Custom',
+                        ac: this.customM.ac,
+                        hp: this.customM.hp,
+                        speed: this.customM.speed,
+                        dex: this.customM.dex,
+                        cr: this.customM.cr,
+                        
+                        stats: {
+                            ...this.customM,
+                            skill: this.customM.skills ? { "other": [this.customM.skills] } : null,
+                            resStr: this.customM.resStr || null,
+                            immStr: this.customM.immStr || null,
+                            vulStr: this.customM.vulStr || null,
+                            conImmStr: this.customM.conImmStr || null,
+                            senses: this.customM.senses ? [this.customM.senses] : [],
+                            languages: this.customM.languages ? [this.customM.languages] : [],
+                            trait: parseEntries(this.customM.rawTraits),
+                            action: parseEntries(this.customM.rawActions),
+                            bonus: parseEntries(this.customM.rawBonus),
+                            reaction: parseEntries(this.customM.rawReactions),
+                            legendary: parseEntries(this.customM.rawLegendary),
+                            spellcasting: spellcasting
+                        }
+                    };
+
+                    this.database.push(newMonster);
+                    this.saveLocalStorage('monster');
+                    this.showCustomModal = false;
+                    
+                    // Reset form for next use
+                    this.customM = { 
+                        name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1', 
+                        str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, 
+                        skills: '', senses: '', languages: '', spellAbility: 'INT', spellSave: 12,
+                        spellAtWill: '', spell1Day: '', spell2Day: '', spell3Day: '',
+                        rawTraits: '', rawActions: '', rawBonus: '', rawReactions: '', rawLegendary: '' 
+                    };
+                    
+                    this.notify("Custom monster saved!");
                 },
 
                 addPlayerToDb() {
@@ -777,6 +1049,12 @@
                         currentHp: monster.hp, // Initialize current HP
                         init: finalInit,
                         stats: monster.stats,
+                        cr: monster.cr,
+                        speed: monster.speed,
+                        resStr: monster.resStr,
+                        immStr: monster.immStr,
+                        vulStr: monster.vulStr,
+                        conImmStr: monster.conImmStr,
                         isPlayer: false
                     });
 
@@ -844,26 +1122,65 @@
                 },
 
                 format5e(entries) {
-                    if (!entries || !Array.isArray(entries)) return "";
-                    
-                    // Join the array into one string first
-                    let text = entries.join(" ");
+                    if (!entries) return "";
+    
+                    const flatten = (e) => {
+                        if (typeof e === 'string') return e;
+                        if (Array.isArray(e)) return e.map(flatten).join("<br>");
+                        if (e.entries) return flatten(e.entries);
+                        if (e.items) return `<ul class="list-disc ml-4">${e.items.map(i => `<li>${flatten(i)}</li>`).join("")}</ul>`;
+                        return "";
+                    };
 
-                    return text
-                        // Attacks: {@atk mw} -> Melee Weapon Attack:
+                    return flatten(entries)
                         .replace(/\{@atk mw\}/g, "<i>Melee Weapon Attack:</i>")
+                        .replace(/\{@atkr m\}/g, "<i>Melee Weapon Attack:</i>")
                         .replace(/\{@atk rw\}/g, "<i>Ranged Weapon Attack:</i>")
-                        // To Hit: {@hit 4} -> +4
-                        .replace(/\{@hit (.*?)\}/g, "+$1")
-                        // Hit: {@h} -> Hit:
+                        .replace(/\{@atkr r\}/g, "<i>Ranged Weapon Attack:</i>")
+                        .replace(/\{@atk ms\}/g, "<i>Melee Spell Attack:</i>")
+                        .replace(/\{@atk rs\}/g, "<i>Ranged Spell Attack:</i>")
+                        .replace(/\{@atk ms,rs\}/g, "<i>Melee or Ranged Spell Attack:</i>")
                         .replace(/\{@h\}/g, "<b>Hit:</b> ")
-                        // Damage/Dice: {@damage 1d6 + 2} -> 1d6 + 2
+                        .replace(/\{@recharge\s+(\d)\}/g, "(Recharge $1–6)")
+                        
+                        // 2. Save/Outcome Meta Tags
+                        .replace(/\{@actSaveSuccessOrFail\}/g, "")
+                        .replace(/\{@actSaveFail\}/g, "<i>On a failed save,</i>")
+                        .replace(/\{@actSaveSuccess\}/g, "<i>On a successful save,</i>")
+                        .replace(/\{@actTrigger\}/g, "<i>Trigger:</i>")
+                        .replace(/\{@actResponse\}/g, "<i>Response:</i>")
+
+                        .replace(/\{@spell (.*?)\}/g, '<span class="text-blue-700 italic underline cursor-pointer">$1</span>')
+
+                        // 3. Complex Piped Tags: {@tag Text|Source|Etc} -> "Text"
+                        // This captures tags like {@spell Fireball|PHB}, {@condition Blinded|PHB}, or {@creature Goblin|MM}
+                        .replace(/\{@\w+ ([^}|]+)(?:\|[^}]*)?\}/g, "$1")
+
+                        // 4. Dice and Damage (Keeping just the numbers/formula)
+                        .replace(/\{@hit (.*?)\}/g, "+$1")
                         .replace(/\{@damage (.*?)\}/g, "<b>$1</b>")
                         .replace(/\{@dice (.*?)\}/g, "<b>$1</b>")
-                        // Recharge: {@recharge 5} -> (Recharge 5-6)
-                        .replace(/\{@recharge (.*?)\}/g, "(Recharge $1–6)")
-                        // Cleanup: remove any remaining tags like {@ability ...} or {@creature ...}
-                        .replace(/\{@\w+ (.*?)\}/g, "$1");
+                        .replace(/\{@scaledice [^|]+\|[^|]+\|(.*?)\}/g, "<b>$1</b>")
+
+                        // 5. Text Formatting Tags
+                        .replace(/\{@i (.*?)\}/g, "<i>$1</i>")
+                        .replace(/\{@b (.*?)\}/g, "<b>$1</b>")
+                        .replace(/\{@u (.*?)\}/g, "<u>$1</u>")
+                        .replace(/\{@note (.*?)\}/g, "<i>Note: $1</i>")
+
+                        // 6. Final Cleanup: Any remaining {@tag ...} and loose braces
+                        .replace(/\{@\w+ (.*?)\}/g, "$1")
+                        .replace(/\{|\}/g, "");
+                },
+
+                formatDamage(dm) {
+                    if (!dm) return null;
+                    return dm.map(i => {
+                        if (typeof i === 'string') return i;
+                        if (i.res) return i.res.join(', ') + (i.note ? ` ${i.note}` : '');
+                        if (i.immune) return i.immune.join(', ') + (i.note ? ` ${i.note}` : '');
+                        return i;
+                    }).join(', ');
                 },
 
                 nextTurn() {
@@ -964,7 +1281,7 @@
                                 // Update App State
                                 this.database = data.monsters;
                                 this.playerDb = data.players;
-                                this.sourceBooks = data.sources || ['mm', 'mpmm', 'bgg'];
+                                this.sourceBooks = data.sources || ['xmm', 'mpmm', 'bgg'];
                                 this.initiativeList = data.initiative || [];
                                 this.instanceTracker = data.instances || {};
                                 
