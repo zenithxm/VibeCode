@@ -620,7 +620,10 @@
                 </div>
 
                 <div class="space-y-2">
-                    <input type="text" x-model="customM.skills" placeholder="Skills (Athletics +4, Deception +4)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" x-model="customM.saves" placeholder="Saving throws" class="w-full bg-slate-700 rounded p-2 text-xs">
+                        <input type="text" x-model="customM.skills" placeholder="Skills (Athletics +4, Deception +4)" class="w-full bg-slate-700 rounded p-2 text-xs">
+                    </div>
                     <div class="grid grid-cols-2 gap-2">
                         <input type="text" x-model="customM.resStr" placeholder="Resistances (Fire, Cold)" class="w-full bg-slate-700 rounded p-2 text-xs">
                         <input type="text" x-model="customM.immStr" placeholder="Immunities (Poison)" class="w-full bg-slate-700 rounded p-2 text-xs">
@@ -714,7 +717,7 @@
                     isNpc: false,
                     name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1',
                     str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
-                    skills: '', senses: '', languages: '',
+                    saves: '', skills: '', senses: '', languages: '',
                     spellAbility: 'INT', spellSave: 12,
                     spellAtWill: '', spell1Day: '', spell2Day: '', spell3Day: '',
                     rawTraits: '', rawActions: '', rawBonus: '', rawReactions: '', rawLegendary: '',
@@ -989,7 +992,8 @@
                         
                         stats: {
                             ...this.customM,
-                            skill: this.customM.skills ? { "other": [this.customM.skills] } : null,
+                            save: this.customM.saves ? { "-": [this.customM.saves] } : null,
+                            skill: this.customM.skills ? { "-": [this.customM.skills] } : null,
                             resStr: this.customM.resStr || null,
                             immStr: this.customM.immStr || null,
                             vulStr: this.customM.vulStr || null,
@@ -1006,6 +1010,7 @@
                     };
 
                     this.database.push(newMonster);
+                    this.database.sort((a, b) => a.name.localeCompare(b.name));
                     this.saveLocalStorage('monster');
                     this.showCustomModal = false;
                     
@@ -1014,7 +1019,7 @@
                         isNpc: false,
                         name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1', 
                         str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, 
-                        skills: '', senses: '', languages: '', spellAbility: 'INT', spellSave: 12,
+                        saves: '', skills: '', senses: '', languages: '', spellAbility: 'INT', spellSave: 12,
                         spellAtWill: '', spell1Day: '', spell2Day: '', spell3Day: '',
                         rawTraits: '', rawActions: '', rawBonus: '', rawReactions: '', rawLegendary: '' 
                     };
