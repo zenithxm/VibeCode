@@ -43,17 +43,18 @@
     <main class="p-4 max-w-md mx-auto">
         
         <div x-show="tab === 'initiative'" x-cloak>            
-            <div class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md pt-2 pb-4 border-b border-slate-800 mb-4">
-                <div class="flex justify-between items-end mb-4">
-                    <h1 @click="showSummary = !showSummary" 
-                        class="text-2xl font-black text-orange-500 cursor-pointer flex items-center gap-2 select-none active:opacity-70">
-                        ENCOUNTER
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="showSummary ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
-                        </svg>
-                    </h1>
-                    <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1" 
-                        x-text="initiativeList.filter(e => !e.isPlayer).length + ' Monsters total'"></span>
+            <div class="sticky top-0 z-40 bg-slate-900/95 backdrop-blur-md pb-4 border-b border-slate-800 mb-4">
+                <div class="flex justify-between items-end mb-4">                    
+                    <div>
+                        <h1 @click="showSummary = !showSummary" 
+                            class="text-3xl font-black text-blue-500 tracking-tighter flex items-center gap-2">ENCOUNTER
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="showSummary ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </h1>
+                        <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold"
+                            x-text="initiativeList.filter(e => !e.isPlayer).length + ' Monsters total'"></p>
+                    </div>
                     <button @click="clearCombat()" class="text-xs text-slate-500 underline uppercase tracking-widest">Clear Combat</button>
                 </div>
                 <div x-show="showSummary" 
@@ -323,7 +324,10 @@
         </div>
 
         <div x-show="tab === 'players'" x-cloak>
-            <h1 class="text-2xl font-black text-blue-500 mb-4 uppercase">Manage Party</h1>
+            <div>
+                <h1 class="text-3xl font-black text-blue-500 tracking-tighter">PARTY</h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold pb-4">Manage your Group</p>
+            </div>
     
             <div class="bg-slate-800 p-4 rounded-2xl border border-slate-700 mb-6 space-y-3">
                 <div>
@@ -368,53 +372,100 @@
         </div>
 
         <div x-show="tab === 'database'" x-cloak>
-            <div class="flex justify-between items-center mb-4">
-                <h1 class="text-2xl font-black text-orange-500">LIBRARY</h1>
+            <div class="flex justify-between items-end pb-4">
+                <div>
+                    <h1 class="text-3xl font-black text-orange-500 tracking-tighter">LIBRARY</h1>
+                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Manage your Bestiary</p>
+                </div>
                 <div class="flex gap-2">
+                    <button @click="showCustomModal = true" 
+                            class="p-2 bg-gradient-to-r from-green-600 to-emerald-700 hover:from-green-500 hover:to-emerald-600 rounded-lg text-slate-300 transition-all border border-slate-700 active:scale-90"
+                            title="Sync Data">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                        </svg>
+                    </button>
                     <button @click="refreshLibrary()" 
-                            class="text-[10px] bg-slate-700 hover:bg-slate-600 px-3 py-1 rounded text-slate-300 font-bold uppercase tracking-widest transition-colors">
-                        <span x-show="!loading">↺ Sync Data</span>
-                        <span x-show="loading">Syncing...</span>
+                            class="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-all border border-slate-700 active:scale-90"
+                            title="Sync Data">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" :class="loading ? 'animate-spin' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
                     </button>
                     <button @click="clearAllData()" 
-                            class="text-[10px] bg-red-900/40 hover:bg-red-600 px-3 py-1 rounded text-red-400 hover:text-white font-bold uppercase tracking-widest transition-colors border border-red-900/50">
+                            class="px-3 py-1 bg-red-950/30 hover:bg-red-600 rounded-lg text-red-500 hover:text-white text-[10px] font-black uppercase transition-all border border-red-900/50">
                         Clear All
                     </button>
                 </div>
             </div>
-            
-                <button @click="showCustomModal = true" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4 flex items-center justify-center gap-2">
-                    <span class="text-lg">+</span> Create Custom Monster
-                </button>
-            
-            <div class="flex gap-2 mb-2">
-                <input type="text" x-model="searchQuery" @keyup.enter="searchMonster()" 
-                       placeholder="Search monster name..." 
-                       class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-4 py-3 focus:ring-2 focus:ring-orange-500 outline-none">
-                <button @click="searchMonster()" class="bg-orange-600 px-6 rounded-lg font-bold shadow-lg" :disabled="loading">
-                    <span x-show="!loading">Search</span>
-                    <span x-show="loading">...</span>
-                </button>
+
+            <div class="relative flex flex-col gap-2">
+                <div class="relative group">
+                    <input type="text" x-model="searchQuery" @keyup.enter="searchMonster()" 
+                        placeholder="Search 5e SRD..." 
+                        class="w-full bg-slate-900 border-2 border-slate-700 rounded-2xl px-5 py-4 pl-12 focus:border-orange-500 focus:ring-0 outline-none transition-all text-slate-100 placeholder:text-slate-600">
+                    <div class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <button @click="searchMonster()" 
+                            class="absolute right-2 top-2 bottom-2 bg-orange-600 hover:bg-orange-500 px-5 rounded-xl font-black text-white text-xs uppercase transition-all active:scale-95 disabled:opacity-50" 
+                            :disabled="loading">
+                        <span x-show="!loading text-shadow">Find</span>
+                        <div x-show="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                    </button>
+                </div>
             </div>
 
-            <div x-show="searchResults.length > 0" class="mb-8 bg-slate-800 border border-orange-900/30 rounded-lg overflow-hidden">
-                <div class="bg-slate-700 px-4 py-2 text-xs font-bold text-slate-300 uppercase tracking-widest">Search Results</div>
-                <template x-for="res in searchResults" :key="res.slug">
-                    <div class="flex justify-between items-center p-4 border-b border-slate-700 last:border-0">
-                        <div>
-                            <div class="font-bold" x-text="res.name"></div>
-                            <div class="text-[9px] text-slate-500 italic">Formerly: <span x-text="res.former"></span></div>
-                            <div class="text-[10px] text-orange-400 uppercase font-bold" x-text="res.document__title"></div>
-                            <div class="text-xs text-slate-400">CR <span x-text="res.challenge_rating"></span> • <span x-text="res.type"></span></div>
+            <div x-show="searchResults.length > 0" x-transition class="bg-slate-900/50 border border-slate-700 rounded-2xl overflow-hidden shadow-2xl">
+                <div class="bg-slate-800/80 px-4 py-2 flex justify-between items-center">
+                    <span class="text-[10px] font-black text-slate-400 uppercase tracking-widest">Available in SRD</span>
+                    <span class="text-[10px] text-orange-500 font-bold" x-text="searchResults.length + ' results'"></span>
+                </div>
+                <div class="max-h-96 overflow-y-auto divide-y divide-slate-800">
+                    <template x-for="res in searchResults" :key="res.slug">
+                        <div class="group flex justify-between items-center p-4 hover:bg-orange-500/5 transition-colors">
+                            <div class="space-y-1">
+                                <div class="font-bold text-slate-100 group-hover:text-orange-400 transition-colors" x-text="res.name"></div>
+                                <div class="flex gap-2 items-center">
+                                    <span class="px-1.5 py-0.5 bg-slate-800 rounded text-[9px] font-bold text-orange-500 border border-orange-500/20" x-text="'CR ' + res.challenge_rating"></span>
+                                    <span class="text-[10px] text-slate-500 font-medium" x-text="res.type"></span>
+                                </div>
+                                <div class="text-[9px] text-slate-600 font-bold uppercase" x-text="res.document__title"></div>
+                            </div>
+                            <button @click="saveToDb(res)" 
+                                    class="bg-blue-600 hover:bg-blue-500 text-white p-2 rounded-xl transition-all active:scale-90 shadow-lg shadow-blue-900/40">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 4v16m8-8H4" />
+                                </svg>
+                            </button>
                         </div>
-                        <button @click="saveToDb(res)" class="bg-blue-600 text-xs font-bold px-3 py-1 rounded uppercase tracking-tighter">Add to Library</button>
-                    </div>
-                </template>
+                    </template>
+                </div>
+            </div>
+
+            <div class="flex bg-slate-950 p-1.5 rounded-2xl border border-slate-800 shadow-inner">
+                <button @click="filterType = 'monster'" 
+                    :class="filterType === 'monster' ? 'bg-orange-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'"
+                    class="flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all">
+                    Monsters
+                </button>
+                <button @click="filterType = 'all'" 
+                    :class="filterType === 'all' ? 'bg-slate-700 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'"
+                    class="flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all">
+                    All
+                </button>
+                <button @click="filterType = 'npc'" 
+                    :class="filterType === 'npc' ? 'bg-green-600 text-white shadow-lg' : 'text-slate-500 hover:text-slate-300'"
+                    class="flex-1 py-3 text-[10px] font-black uppercase rounded-xl transition-all">
+                    NPCs
+                </button>
             </div>
 
             <div class="space-y-2 mt-6">
                 <h2 class="text-slate-500 text-xs font-bold uppercase tracking-widest px-1">Saved Monsters</h2>
-                <template x-for="m in database" :key="m.slug">
+                <template x-for="m in database.filter(i => filterType === 'all' ? true : (filterType === 'npc' ? i.isNpc : !i.isNpc))" :key="m.slug">
                     <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
                         <div>
                             <div class="font-bold text-slate-200" x-text="m.name"></div>                            
@@ -431,7 +482,10 @@
         </div>
 
         <div x-show="tab === 'settings'" x-cloak>
-            <h1 class="text-2xl font-black text-slate-100 mb-6 uppercase">Settings & Backup</h1>
+            <div>
+                <h1 class="text-3xl font-black text-blue-500 tracking-tighter">SETTING</h1>
+                <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold pb-4">Export, Import and Source Books</p>
+            </div>
 
             <div class="space-y-6">
                 <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700">
@@ -499,8 +553,26 @@
                 </div>
             </div>
 
+            <div class="flex bg-slate-900/50 p-1 rounded-xl border border-slate-700 mb-4">
+                <button @click="filterType = 'monster'" 
+                    :class="filterType === 'monster' ? 'bg-orange-500 text-white shadow-lg' : 'text-slate-400'"
+                    class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all">
+                    Monsters
+                </button>
+                <button @click="filterType = 'all'" 
+                    :class="filterType === 'all' ? 'bg-slate-600 text-white shadow-lg' : 'text-slate-400'"
+                    class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all">
+                    All
+                </button>
+                <button @click="filterType = 'npc'" 
+                    :class="filterType === 'npc' ? 'bg-green-600 text-white shadow-lg' : 'text-slate-400'"
+                    class="flex-1 py-2 text-[10px] font-black uppercase rounded-lg transition-all">
+                    NPCs
+                </button>
+            </div>
+
             <div class="max-h-80 overflow-y-auto space-y-2 mb-4 pr-1 custom-scrollbar">
-                <template x-for="m in database" :key="m.slug">
+                <template x-for="m in database.filter(i => filterType === 'all' ? true : (filterType === 'npc' ? i.isNpc : !i.isNpc))" :key="m.slug">
                     <button @click="addToInitiative(m, count); showAddMonsterModal = false; count = 1" 
                             class="w-full text-left bg-slate-700/50 p-4 rounded-xl hover:bg-slate-600 transition-all flex justify-between items-center border border-slate-700 active:scale-95">
                         <div>
@@ -713,6 +785,7 @@
                 newSourceBook: '',
                 showCustomModal: false,
                 count: 1,
+                filterType: 'all',
                 customM: {
                     isNpc: false,
                     name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1',
