@@ -17,7 +17,7 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen pb-24" x-data="app()" x-init="init()">
 
     <nav class="fixed bottom-0 left-0 right-0 bg-slate-800 border-t border-slate-700 flex justify-around p-4 z-50 shadow-2xl">
-        <button @click="tab = 'initiative'" :class="tab === 'initiative' ? 'text-orange-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
+        <button @click="tab = 'initiative'" :class="tab === 'initiative' ? 'text-red-400 font-bold' : 'text-slate-400'" class="flex flex-col items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -47,7 +47,7 @@
                 <div class="flex justify-between items-end mb-4">                    
                     <div>
                         <h1 @click="showSummary = !showSummary" 
-                            class="text-3xl font-black text-blue-500 tracking-tighter flex items-center gap-2">ENCOUNTER
+                            class="text-3xl font-black text-red-500 tracking-tighter flex items-center gap-2">ENCOUNTER
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 transition-transform" :class="showSummary ? 'rotate-180' : ''" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 9l-7 7-7-7" />
                             </svg>
@@ -483,7 +483,7 @@
 
         <div x-show="tab === 'settings'" x-cloak>
             <div>
-                <h1 class="text-3xl font-black text-blue-500 tracking-tighter">SETTING</h1>
+                <h1 class="text-3xl font-black text-white-500 tracking-tighter">SETTING</h1>
                 <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold pb-4">Export, Import and Source Books</p>
             </div>
 
