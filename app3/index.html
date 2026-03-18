@@ -104,7 +104,8 @@
                         class="rounded-xl border overflow-hidden shadow-lg monster-card transition-all duration-300 mb-4" 
                         :class="[
                             activeTurnIndex === index ? 'ring-4 ring-yellow-500 border-yellow-500 scale-[1.01]' : '',
-                            entity.isPlayer ? 'bg-slate-800 border-blue-900/50' : 'bg-slate-800 border-slate-700'
+                            entity.isPlayer ? 'bg-slate-800 border-blue-900/50' : 
+                                entity.isNpc ? 'bg-green-800 border-green-900/50' : 'bg-slate-800 border-slate-700'
                         ]">
                         
                         <template x-if="activeTurnIndex === index">
@@ -119,9 +120,10 @@
                             <div class="p-4 flex items-center justify-between gap-3">
                                 <div class="flex items-center gap-3">
                                     <div class="relative group">
-                                        <div class="absolute inset-0 blur-sm opacity-20" :class="entity.isPlayer ? 'bg-blue-500' : 'bg-orange-500'"></div>
+                                        <div class="absolute inset-0 blur-sm opacity-20" :class="entity.isPlayer ? 'bg-blue-500' : entity.isNpc ? 'bg-green-500' : 'bg-orange-500'"></div>
                                         <div class="relative w-12 h-12 flex flex-col items-center justify-center rounded-xl border-2 font-black shadow-lg"
-                                            :class="entity.isPlayer ? 'bg-slate-900 border-blue-500 text-blue-400' : 'bg-slate-900 border-orange-500 text-orange-500'">
+                                            :class="entity.isPlayer ? 'bg-slate-900 border-blue-500 text-blue-400' : 
+                                                        entity.isNpc ? 'bg-slate-900 border-green-500 text-green-500' : 'bg-slate-900 border-orange-500 text-orange-500'">
                                             <span class="text-[10px] uppercase leading-none mb-0.5 opacity-60">Init</span>
                                             <span class="text-xl leading-none" x-text="entity.init"></span>
                                         </div>
@@ -416,7 +418,8 @@
                     <div class="flex justify-between items-center bg-slate-800 p-4 rounded-xl border border-slate-700">
                         <div>
                             <div class="font-bold text-slate-200" x-text="m.name"></div>                            
-                            <div class="text-[10px] text-orange-400 uppercase font-bold" x-text="m.source"></div>
+                            <div class="text-[10px] uppercase font-bold"
+                                :class="m.isNpc ? 'text-green-400' : 'text-orange-400'" x-text="m.source"></div>
                             <div class="text-[10px] text-slate-500 uppercase">
                                 <span x-text="m.type"></span> • CR <span x-text="m.cr"></span> • AC <span x-text="m.ac"></span> • HP <span x-text="m.hp"></span> 
                             </div>
@@ -493,7 +496,8 @@
                     <button @click="addToInitiative(m); showAddMonsterModal = false" 
                             class="w-full text-left bg-slate-700 p-3 rounded-lg hover:bg-slate-600 flex justify-between items-center">
                         <span class="font-bold" x-text="m.name"></span>
-                        <span class="text-xs text-orange-400">Add +</span>
+                        <span class="text-xs font-bold transition-colors"
+                            :class="m.isNpc ? 'text-green-400' : 'text-orange-400'">Add +</span>
                     </button>
                 </template>
                 <div x-show="database.length === 0" class="text-slate-500 italic text-center p-4">No monsters in library</div>
@@ -571,6 +575,20 @@
                 <div class="grid grid-cols-2 gap-2">
                     <input type="text" x-model="customM.name" placeholder="Name" class="w-full bg-slate-700 rounded p-2 text-sm">
                     <input type="text" x-model="customM.type" placeholder="Type (Humanoid, etc)" class="w-full bg-slate-700 rounded p-2 text-sm">
+                </div>
+
+                <div class="flex items-center space-x-4 mb-4 bg-slate-700/30 p-2 rounded border border-slate-600">
+                    <label class="flex items-center cursor-pointer group">
+                        <div class="relative">
+                            <input type="checkbox" x-model="customM.isNpc" class="sr-only">
+                            <div class="w-10 h-4 bg-slate-600 rounded-full shadow-inner"></div>
+                            <div :class="customM.isNpc ? 'translate-x-6 bg-green-500' : 'translate-x-0 bg-slate-400'" 
+                                class="absolute -left-1 -top-1 w-6 h-6 rounded-full transition-transform duration-200 ease-in-out border border-slate-800 shadow"></div>
+                        </div>
+                        <div class="ml-3 text-xs font-bold uppercase" :class="customM.isNpc ? 'text-green-400' : 'text-slate-400'">
+                            Is this an NPC? <span x-text="customM.isNpc ? '(Green)' : '(Standard)'"></span>
+                        </div>
+                    </label>
                 </div>
 
                 <div class="grid grid-cols-4 gap-2">
@@ -680,6 +698,7 @@
                 newSourceBook: '',
                 showCustomModal: false,
                 customM: {
+                    isNpc: false,
                     name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1',
                     str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10,
                     skills: '', senses: '', languages: '',
@@ -945,6 +964,7 @@
 
                     const newMonster = {
                         slug: 'custom-' + Date.now(),
+                        isNpc: this.customM.isNpc,
                         name: this.customM.name,
                         type: this.customM.type || "unknown",
                         source: 'Custom',
@@ -978,6 +998,7 @@
                     
                     // Reset form for next use
                     this.customM = { 
+                        isNpc: false,
                         name: '', type: '', ac: 10, hp: 10, speed: '30 ft.', cr: '1', 
                         str: 10, dex: 10, con: 10, int: 10, wis: 10, cha: 10, 
                         skills: '', senses: '', languages: '', spellAbility: 'INT', spellSave: 12,
@@ -1041,6 +1062,7 @@
 
                     this.initiativeList.push({
                         id: Date.now() + Math.random(),
+                        isNpc: monster.isNpc,
                         name: monster.name,
                         instanceNum: num,
                         displayName: `${monster.name} ${num}`,
