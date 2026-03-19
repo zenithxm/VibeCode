@@ -1316,9 +1316,12 @@
 
                 // Update your Clear Combat logic to also reset the turn
                 clearCombat() {
-                    this.initiativeList = [];
-                    this.instanceTracker = {};
-                    this.activeTurnIndex = null;
+                    const confirm1 = confirm("⚠️ WARNING: This will clear the initiative. Are you sure?");
+                    if (confirm1) {
+                        this.initiativeList = [];
+                        this.instanceTracker = {};
+                        this.activeTurnIndex = null;
+                    }
                 },
 
                 get monsterSummary() {
