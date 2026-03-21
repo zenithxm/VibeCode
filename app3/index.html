@@ -806,6 +806,12 @@
 
                     const savedSources = localStorage.getItem('dnd_sources_v1');
                     if (savedSources) this.sourceBooks = JSON.parse(savedSources);
+
+                    const savedInitiative = localStorage.getItem('dnd_initiative_v1');
+                    if (savedInitiative) this.initiativeList = JSON.parse(savedInitiative);
+
+                    const savedTracker = localStorage.getItem('dnd_tracker_v1');
+                    if (savedTracker) this.instanceTracker = JSON.parse(savedTracker);
                     
                     // Load the big library from IndexedDB (Persistent storage)
                     await this.loadLibraryFromCache();
@@ -1129,6 +1135,10 @@
                     if (type === 'monster') localStorage.setItem('dnd_monsters_v2', JSON.stringify(this.database));
                     if (type === 'player') localStorage.setItem('dnd_players_v1', JSON.stringify(this.playerDb));
                     if (type === 'sources') localStorage.setItem('dnd_sources_v1', JSON.stringify(this.sourceBooks));
+                    if (type === 'initiative') {
+                        localStorage.setItem('dnd_initiative_v1', JSON.stringify(this.initiativeList));
+                        localStorage.setItem('dnd_tracker_v1', JSON.stringify(this.instanceTracker));
+                    }
                 },
 
                 deleteFromDb(slug) {
@@ -1141,6 +1151,7 @@
                     const dexMod = Math.floor((monster.dex - 10) / 2);
                     const roll = Math.floor(Math.random() * 20) + 1;
                     const finalInit = roll + dexMod;
+                    let num = 1;
 
                     // Loop for the amount requested
                     for (let i = 0; i < qty; i++) {
@@ -1148,7 +1159,6 @@
                             this.instanceTracker[monster.name] = [];
                         }
 
-                        let num = 1;
                         while (this.instanceTracker[monster.name].includes(num)) {
                             num++;
                         }
@@ -1175,8 +1185,9 @@
                         });
                     }
 
-                    this.notify(`Added ${qty}x ${monster.name} at initiative ${finalInit}`);
+                    this.notify(`Added ${qty}x ${monster.name} ${num} at initiative ${finalInit}`);
                     this.initiativeList.sort((a, b) => b.init - a.init);
+                    this.saveLocalStorage('initiative');
                 },
                 
                 applyChange(entity, type, target) {
@@ -1222,6 +1233,7 @@
                     });
 
                     this.initiativeList.sort((a, b) => b.init - a.init);
+                    this.saveLocalStorage('initiative');
                     initInput.value = ''; // Reset the init input field
                     this.showAddPlayerModal = false;
                     this.notify(`${entity.name} joined the fray! (at initiative ${finalInit})`);
@@ -1232,6 +1244,7 @@
                     if (!isPlayer && this.instanceTracker[name]) {
                         this.instanceTracker[name] = this.instanceTracker[name].filter(n => n !== num);
                     }
+                    this.saveLocalStorage('initiative');
                 },
 
                 toggleDetails(id) {
@@ -1321,6 +1334,7 @@
                         this.initiativeList = [];
                         this.instanceTracker = {};
                         this.activeTurnIndex = null;
+                        this.saveLocalStorage('initiative');
                     }
                 },
 
@@ -1366,8 +1380,8 @@
                         monsters: JSON.parse(localStorage.getItem('dnd_monsters_v2') || '[]'),
                         players: JSON.parse(localStorage.getItem('dnd_players_v1') || '[]'),
                         sources: JSON.parse(localStorage.getItem('dnd_sources_v1') || '[]'),
-                        initiative: this.initiativeList,
-                        instances: this.instanceTracker
+                        initiative: JSON.parse(localStorage.getItem('dnd_initiative_v1') || '[]'),
+                        instances: JSON.parse(localStorage.getItem('dnd_tracker_v1') || '[]')
                     };
                     
                     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
@@ -1397,6 +1411,8 @@
                                 localStorage.setItem('dnd_monsters_v2', JSON.stringify(data.monsters));
                                 localStorage.setItem('dnd_players_v1', JSON.stringify(data.players));
                                 localStorage.setItem('dnd_sources_v1', JSON.stringify(data.sources));
+                                localStorage.setItem('dnd_initiative_v1', JSON.stringify(data.initiative));
+                                localStorage.setItem('dnd_tracker_v1', JSON.stringify(data.instances));
                                 
                                 // Update App State
                                 this.database = data.monsters;
