@@ -412,7 +412,7 @@
                     <button @click="searchMonster()" 
                             class="absolute right-2 top-2 bottom-2 bg-orange-600 hover:bg-orange-500 px-5 rounded-xl font-black text-white text-xs uppercase transition-all active:scale-95 disabled:opacity-50" 
                             :disabled="loading">
-                        <span x-show="!loading text-shadow">Find</span>
+                        <span x-show="!loading" class="text-shadow">Find</span>
                         <div x-show="loading" class="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                     </button>
                 </div>
@@ -1213,6 +1213,7 @@
                         }
                     }
                     input.value = ''; // Reset input
+                    this.saveLocalStorage('initiative');
                 },
 
                 addPlayerToInitiative(player) {
@@ -1236,15 +1237,18 @@
                     this.saveLocalStorage('initiative');
                     initInput.value = ''; // Reset the init input field
                     this.showAddPlayerModal = false;
-                    this.notify(`${entity.name} joined the fray! (at initiative ${finalInit})`);
+                    this.notify(`${player.name} joined the fray! (at initiative ${finalInit})`);
                 },
 
                 removeFromInitiative(index, name, num, isPlayer) {
-                    this.initiativeList.splice(index, 1);
-                    if (!isPlayer && this.instanceTracker[name]) {
-                        this.instanceTracker[name] = this.instanceTracker[name].filter(n => n !== num);
+                    const confirm1 = confirm("⚠️ WARNING: This will remove the char from initiative. Are you sure?");
+                    if (confirm1) {
+                        this.initiativeList.splice(index, 1);
+                        if (!isPlayer && this.instanceTracker[name]) {
+                            this.instanceTracker[name] = this.instanceTracker[name].filter(n => n !== num);
+                        }
+                        this.saveLocalStorage('initiative');
                     }
-                    this.saveLocalStorage('initiative');
                 },
 
                 toggleDetails(id) {
