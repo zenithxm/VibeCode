@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Team Global Chat</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        #messages { border: 1px solid #eee; height: 400px; overflow-y: scroll; padding: 10px; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+        .msg-item { background: #f1f0f0; padding: 10px; border-radius: 10px; line-height: 1.4; }
+        .username { font-weight: bold; color: #007bff; font-size: 0.85em; display: block; margin-bottom: 2px; }
+        .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+        .input-group { display: flex; gap: 10px; }
+        input { padding: 12px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
+        #userInput { width: 30%; border-bottom: 2px solid #007bff; }
+        #msgInput { flex-grow: 1; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #0056b3; }
+        #status { font-size: 0.8em; color: green; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2>Team Chat</h2>
+        <div id="status">Connecting...</div>
+        <ul id="messages"></ul>
+        
+        <div class="controls">
+            <input type="text" id="userInput" placeholder="Your Name" maxlength="15">
+            <div class="input-group">
+                <input type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') document.getElementById('sendBtn').click()">
+                <button id="sendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+      import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyA58YFNjlQQqgRrYhhvYNk7X2Ar4CHMkdA",
+        authDomain: "chat-system-d3452.firebaseapp.com",
+        databaseURL: "https://chat-system-d3452-default-rtdb.asia-southeast1.firebasedatabase.app/", 
+        projectId: "chat-system-d3452",
+        appId: "1:956135325032:web:62fcc1943846dac4f1aadd"
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
+      const messagesRef = ref(db, 'messages');
+      
+      document.getElementById('status').innerText = "● Live System Connected";
+
+      const userInput = document.getElementById('userInput');
+      const msgInput = document.getElementById('msgInput');
+      const btn = document.getElementById('sendBtn');
+
+      // --- SEND LOGIC ---
+      btn.addEventListener('click', () => {
+        const user = userInput.value.trim() || "Anonymous";
+        const text = msgInput.value.trim();
+
+        if (text !== "") {
+            push(messagesRef, { 
+                username: user,
+                text: text, 
+                time: Date.now() 
+            }).then(() => {
+                msgInput.value = "";
+            }).catch(err => alert("Error: " + err.message));
+        }
+      });
+
+      // --- RECEIVE LOGIC ---
+      onChildAdded(messagesRef, (snapshot) => {
+        const data = snapshot.val();
+        const li = document.createElement('li');
+        li.className = "msg-item";
+        
+        // Add name and text to the list item
+        li.innerHTML = `<span class="username">${data.username}</span> ${data.text}`;
+        
+        document.getElementById('messages').appendChild(li);
+        const container = document.getElementById('messages');
+        container.scrollTop = container.scrollHeight;
+      });
+    </script>
+</body>
+</html>
