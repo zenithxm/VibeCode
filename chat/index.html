@@ -5,38 +5,45 @@
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f7f6; }
         .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        #messages { border: 1px solid #eee; height: 400px; overflow-y: scroll; padding: 10px; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .msg-item { background: #f1f0f0; padding: 10px; border-radius: 10px; line-height: 1.4; }
-        .username { font-weight: bold; color: #007bff; font-size: 0.85em; display: block; margin-bottom: 2px; }
+        #messages { border: 1px solid #eee; height: 400px; overflow-y: scroll; padding: 10px; list-style: none; display: flex; flex-direction: column; gap: 8px; border-radius: 5px; background: #fafafa; }
+        .msg-item { background: white; padding: 10px; border-radius: 10px; line-height: 1.4; border-left: 5px solid #ccc; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: relative; }
+        .username { font-weight: bold; font-size: 0.85em; display: block; margin-bottom: 2px; }
+        .timestamp { font-size: 0.7em; color: #999; float: right; font-weight: normal; }
         .controls { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
         .input-group { display: flex; gap: 10px; }
         input { padding: 12px; border: 1px solid #ddd; border-radius: 5px; outline: none; }
-        #userInput { width: 30%; border-bottom: 2px solid #007bff; }
+        #userInput { width: 35%; font-weight: bold; border-left: 3px solid #007bff; }
         #msgInput { flex-grow: 1; }
-        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        button { padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; }
         button:hover { background: #0056b3; }
-        #status { font-size: 0.8em; color: green; margin-bottom: 10px; }
+        .admin-tools { margin-top: 10px; text-align: right; }
+        .clear-btn { background: #dc3545; font-size: 0.7em; padding: 5px 10px; }
+        #status { font-size: 0.8em; color: #28a745; margin-bottom: 10px; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h2>Team Chat</h2>
-        <div id="status">Connecting...</div>
+        <div id="status">● System Live</div>
         <ul id="messages"></ul>
         
         <div class="controls">
             <input type="text" id="userInput" placeholder="Your Name" maxlength="15">
             <div class="input-group">
-                <input type="text" id="msgInput" placeholder="Type a message..." onkeydown="if(event.key==='Enter') document.getElementById('sendBtn').click()">
+                <input type="text" id="msgInput" placeholder="Type a message..." autocomplete="off">
                 <button id="sendBtn">Send</button>
             </div>
+        </div>
+
+        <div class="admin-tools">
+            <button class="clear-btn" id="clearBtn">Clear History (Demo Mode)</button>
         </div>
     </div>
 
     <script type="module">
+      // Added 'set' and 'remove' to the imports
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-      import { getDatabase, ref, push, onChildAdded } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+      import { getDatabase, ref, push, set, onChildAdded, onChildRemoved, remove, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
       const firebaseConfig = {
         apiKey: "AIzaSyA58YFNjlQQqgRrYhhvYNk7X2Ar4CHMkdA",
@@ -49,42 +56,79 @@
       const app = initializeApp(firebaseConfig);
       const db = getDatabase(app);
       const messagesRef = ref(db, 'messages');
-      
-      document.getElementById('status').innerText = "● Live System Connected";
+      const notificationSound = new Audio("https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3");
 
-      const userInput = document.getElementById('userInput');
-      const msgInput = document.getElementById('msgInput');
-      const btn = document.getElementById('sendBtn');
+      const mySentMessages = new Set();
+      let isInitialLoad = true;
+
+      const getUsernameColor = (str) => {
+        if (!str) return "#888";
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        const c = (hash & 0x00FFFFFF).toString(16).toUpperCase();
+        return "#" + "00000".substring(0, 6 - c.length) + c;
+      };
 
       // --- SEND LOGIC ---
-      btn.addEventListener('click', () => {
-        const user = userInput.value.trim() || "Anonymous";
-        const text = msgInput.value.trim();
+      document.getElementById('sendBtn').addEventListener('click', () => {
+        const text = document.getElementById('msgInput').value.trim();
+        const user = document.getElementById('userInput').value.trim() || "Anonymous";
 
         if (text !== "") {
-            push(messagesRef, { 
+            const newMessageRef = push(messagesRef); // Creates the location
+            const messageId = newMessageRef.key;
+            
+            mySentMessages.add(messageId);
+
+            // CORRECT WAY: set(reference, data)
+            set(newMessageRef, {
                 username: user,
-                text: text, 
-                time: Date.now() 
+                text: text,
+                time: serverTimestamp()
             }).then(() => {
-                msgInput.value = "";
-            }).catch(err => alert("Error: " + err.message));
+                document.getElementById('msgInput').value = "";
+            });
         }
       });
 
       // --- RECEIVE LOGIC ---
       onChildAdded(messagesRef, (snapshot) => {
         const data = snapshot.val();
+        if (!data || !data.text) return;
+
+        const msgId = snapshot.key;
+        const displayName = data.username || "Guest";
+        const userColor = getUsernameColor(displayName);
+        const timeLabel = data.time ? new Date(data.time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : "";
+
         const li = document.createElement('li');
         li.className = "msg-item";
-        
-        // Add name and text to the list item
-        li.innerHTML = `<span class="username">${data.username}</span> ${data.text}`;
+        li.id = "msg-" + msgId; // Give it an ID so we can remove it later
+        li.style.borderLeftColor = userColor;
+        li.innerHTML = `<span class="username" style="color: ${userColor}">${displayName} <span class="timestamp">${timeLabel}</span></span> ${data.text}`;
         
         document.getElementById('messages').appendChild(li);
-        const container = document.getElementById('messages');
-        container.scrollTop = container.scrollHeight;
+        document.getElementById('messages').scrollTop = document.getElementById('messages').scrollHeight;
+
+        if (!isInitialLoad && !mySentMessages.has(msgId)) {
+            notificationSound.play().catch(() => {});
+        }
       });
+
+      // --- ADMIN: CLEAR CHAT ---
+      document.getElementById('clearBtn').addEventListener('click', () => {
+        if(confirm("Wipe all chat history?")) {
+            remove(messagesRef);
+        }
+      });
+
+      // Clear the UI if someone else wipes the database
+      onChildRemoved(messagesRef, () => {
+        document.getElementById('messages').innerHTML = "";
+      });
+
+      setTimeout(() => { isInitialLoad = false; }, 2000);
+      document.getElementById('msgInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') document.getElementById('sendBtn').click(); });
     </script>
 </body>
 </html>
