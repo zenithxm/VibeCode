@@ -18,11 +18,15 @@
 </head>
 <body>
 
-<div class="input-area">
-    <input type="text" id="userInput" placeholder="Name" maxlength="12">
-    <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
-    <button id="sendBtn">Send</button>
-    <button id="clearBtn" style="background: #dc3545;">Clear</button>
+<div class="chat-card">
+    <ul id="messages"></ul>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Name" maxlength="12">
+        <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
+        <button id="sendBtn">Send</button>
+        <button id="clearBtn" style="background: #dc3545;">Clear</button>
+    </div>
 </div>
 
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
