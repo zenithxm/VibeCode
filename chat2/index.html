@@ -27,19 +27,27 @@
     </div>
 </div>
 
+<div class="input-area">
+    <input type="text" id="userInput" placeholder="Name" maxlength="12">
+    <input type="text" id="msgInput" placeholder="Message..." autocomplete="off">
+    <button id="sendBtn">Send</button>
+    <button id="clearBtn" style="background: #dc3545;">Clear</button>
+</div>
+
 <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 <script>
     const socket = io("https://zen93-chat-backend.hf.space");
     socket.on('connect', () => {
         console.log("✅ Connected to Hugging Face Backend!");
     });
-    
+
     const sound = new Audio("https://assets.mixkit.co/active_storage/sfx/2354/2354-preview.mp3");
     
     const messagesList = document.getElementById('messages');
     const msgInput = document.getElementById('msgInput');
     const userInput = document.getElementById('userInput');
     const btn = document.getElementById('sendBtn');
+    const clearBtn = document.getElementById('clearBtn');
 
     const getColor = (name) => {
         let hash = 0;
@@ -48,11 +56,16 @@
     };
 
     const renderMessage = (data) => {
-        const color = getColor(data.user || data.username || "Anonymous");
+        const color = getColor(data.user || "Anonymous");
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const li = document.createElement('li');
         li.className = 'msg';
         li.style.borderLeftColor = color;
-        li.innerHTML = `<span class="u-name" style="color:${color}">${data.user || data.username || "Anonymous"}</span>${data.text}`;
+        li.innerHTML = `
+            <span class="u-name" style="color:${color}">${data.user || "Anonymous"} 
+                <small style="color: #999; font-weight: normal; float: right;">${time}</small>
+            </span>
+            ${data.text}`;
         messagesList.appendChild(li);
         messagesList.scrollTop = messagesList.scrollHeight;
     };
@@ -85,6 +98,11 @@
         }
     });
 
+    socket.on('chat cleared', () => {
+        messagesList.innerHTML = '';
+        console.log("🧹 Database wiped by a user.");
+    });
+
     btn.addEventListener('click', () => {
         if (!msgInput.value.trim()) return;
         socket.emit('chat message', {
@@ -92,6 +110,12 @@
             text: msgInput.value.trim()
         });
         msgInput.value = '';
+    });
+
+    clearBtn.addEventListener('click', () => {
+        if (confirm("Are you sure you want to delete all messages from the SQL database?")) {
+            socket.emit('clear chat');
+        }
     });
 
     msgInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') btn.click(); });
