@@ -2,7 +2,7 @@
   "name": "Team Global Chat",
   "short_name": "TGC Chat",
   "description": "Global Chat System for Teams",
-  "start_url": "/",
+  "start_url": "https://zenithxm.github.io/VibeCode/chat/",
   "display": "standalone",
   "background_color": "#f4f7f6",
   "theme_color": "#007bff",
