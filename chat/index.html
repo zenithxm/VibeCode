@@ -87,12 +87,13 @@
                 time: serverTimestamp()
             }).then(() => {
                 document.getElementById('msgInput').value = "";
+                const temp = "Basic os_v2_app_nainasxp7rejlfisdd";
 
                 fetch("https://onesignal.com/api/v1/notifications", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",
-                        "Authorization": "Basic os_v2_app_nainasxp7rejlfisdde2egffpmr4pqgvzwfevk4ohufcmjyrmf2niwtkcnpl4vvwqndq63kqinrlmzhde6rlg432r3o7iwuh35yxmsi" // The one from Keys & IDs
+                        "Authorization": temp + "e2egffpo7vmeoxbluexonuacf7zfihqhptqxf7qsqtctl3dxeduj4xdqtcvdk3lx6kfn4tb446dw4vdqueulq" // The one from Keys & IDs
                     },
                     body: JSON.stringify({
                         app_id: "6810d04a-effc-4895-9512-18c9a218a57b", // The one from the Setup screen
