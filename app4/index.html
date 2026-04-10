@@ -250,7 +250,7 @@
             background: #1a1411;
             border-radius: 1rem;
             font-size: 0.7rem;
-            max-height: 75vh;
+            max-height: 65vh;
             overflow-y: auto;
             border: 1px solid #4f392a;
             white-space: pre-wrap;
@@ -335,6 +335,8 @@
                 <div class="quick-chip permanent" onclick="quickRoll('a_npc_generator')">👤 NPC</div>
                 <div class="quick-chip permanent" onclick="quickRoll('situations_master_table')">⚡ Situation</div>
                 <div class="quick-chip permanent" onclick="quickRoll('keyword_master_table')">🔑 Keyword</div>
+                <div class="quick-chip permanent" onclick="quickRoll('clue_table')">🔑 Clue Corpse</div>
+                <div class="quick-chip permanent" onclick="quickRoll('wilderness_clue_table')">🔑 Wilderness Clue</div>
             </div>
         </div>
 
@@ -1348,10 +1350,10 @@
     "rollType": "standard",
     "entries": [
       { "min": 1, "max": 52, "type": "Natural clearing, devoid of trees", "nextTable": "qa_table", "diceroll": null, "note": "Is something watching you from the trees? Q/A roll. Do you notice it?" },
-      { "min": 53, "max": 58, "type": "Druid circle containing standing stones", "nextTable": "qa_table", "diceroll": "1d100", "note": "Q/A roll to see what you can discern. Clue 20%" },
-      { "min": 59, "max": 65, "type": "Totems and other sinister symbols", "nextTable": "qa_table", "diceroll": "1d100", "note": "Possibly dark rituals take place here. Q/A rolls, medium encounter 10%. Clue 40%" },
-      { "min": 66, "max": 71, "type": "Pond / watering hole", "nextTable": null, "diceroll": "1d100", "note": "Watering hole for local wildlife. Easy encounter (beast) 20%." },
-      { "min": 72, "max": 77, "type": "Abandoned campsite", "nextTable": "qa_table", "diceroll": "1d100", "note": "Investigation rolls to find out more. Clue 50%" },
+      { "min": 53, "max": 58, "type": "Druid circle containing standing stones", "nextTable": "qa_table", "diceroll": "1d100dc80", "note": "Q/A roll to see what you can discern. Clue 20%" },
+      { "min": 59, "max": 65, "type": "Totems and other sinister symbols", "nextTable": "qa_table", "diceroll": "1d100dc90,1d100dc60", "note": "Possibly dark rituals take place here. Q/A rolls, medium encounter 10%. Clue 40%" },
+      { "min": 66, "max": 71, "type": "Pond / watering hole", "nextTable": null, "diceroll": "1d100dc80", "note": "Watering hole for local wildlife. Easy encounter (beast) 20%." },
+      { "min": 72, "max": 77, "type": "Abandoned campsite", "nextTable": "qa_table", "diceroll": "1d100dc50", "note": "Investigation rolls to find out more. Clue 50%" },
       { "min": 78, "max": 83, "type": "Active campsite", "nextTable": null, "diceroll": "1d100", "note": "DC 8 Perception to hear them. 50% friendly." },
       { "min": 84, "max": 89, "type": "Magic at work (Dimensional rift?)", "nextTable": "qa_table", "diceroll": null, "note": "Q/A rolls to see what’s happening here!" },
       { "min": 90, "max": 95, "type": "Structure present", "nextTable": "structure_table", "diceroll": null, "note": "Roll on Structures table." },
@@ -1366,11 +1368,11 @@
     "entries": [
       { "min": 1, "max": 50, "type": "Standard gully", "nextTable": null, "diceroll": null, "note": "Characteristic of the overarching terrain" },
       { "min": 51, "max": 57, "type": "Gully with a waterway", "nextTable": "waterway_table", "diceroll": null, "note": "Roll on waterways table" },
-      { "min": 58, "max": 64, "type": "Rocky gully containing caves", "nextTable": "qa_table", "diceroll": "1d100", "note": "25% easy encounter. 15% chance they lead to tunnels. 10% NPC." },
+      { "min": 58, "max": 64, "type": "Rocky gully containing caves", "nextTable": "qa_table", "diceroll": "1d100dc75,1d100dc85,1d100dc90", "note": "25% easy encounter. 15% chance they lead to tunnels. 10% NPC." },
       { "min": 65, "max": 71, "type": "Recently caused gully", "nextTable": "qa_table", "diceroll": null, "note": "Caused by earthquake, disaster, or huge creature. Q/A or Nature rolls to discern." },
       { "min": 72, "max": 78, "type": "Dry gully / Bone graveyard", "nextTable": "qa_table", "diceroll": null, "note": "Contains the bones of many animals. Q/A nature rolls to find out more." },
-      { "min": 79, "max": 85, "type": "Heavily wooded gully", "nextTable": "qa_table", "diceroll": "1d100", "note": "Oasis for a specific colony. 25% Easy encounter, 25% clue." },
-      { "min": 86, "max": 92, "type": "Gully with abandoned mine", "nextTable": "dungeon_generator", "diceroll": null, "note": "Evidence of mining. Mines may lead far underground." },
+      { "min": 79, "max": 85, "type": "Heavily wooded gully", "nextTable": "qa_table", "diceroll": "1d100dc75,1d100dc75", "note": "Oasis for a specific colony. 25% Easy encounter, 25% clue." },
+      { "min": 86, "max": 92, "type": "Gully with abandoned mine", "nextTable": "starting_area", "diceroll": null, "note": "Evidence of mining. Mines may lead far underground." },
       { "min": 93, "max": 100, "type": "Magical wooded gully", "nextTable": "qa_table", "diceroll": null, "note": "A druid, wizard, or Fey lives here. 50% Friendly." }
     ]
   },
@@ -1380,11 +1382,11 @@
     "rollType": "standard",
     "entries": [
       { "min": 1, "max": 50, "type": "Low, rolling hills", "nextTable": null, "diceroll": null, "note": "Covered with overarching terrain (wooded in forest, grassy in grassland)." },
-      { "min": 51, "max": 57, "type": "Rocky hills with caves/tunnels", "nextTable": "qa_table", "diceroll": "1d100", "note": "Q/A rolls for tunnel presence and inhabitants. Clue 25%." },
-      { "min": 58, "max": 64, "type": "High hills (vantage point)", "nextTable": "qa_table", "diceroll": "1d100", "note": "Good view of surrounding area. Q/A roll for points of interest. 10% NPC." },
+      { "min": 51, "max": 57, "type": "Rocky hills with caves/tunnels", "nextTable": "qa_table", "diceroll": "1d100dc75", "note": "Q/A rolls for tunnel presence and inhabitants. Clue 25%." },
+      { "min": 58, "max": 64, "type": "High hills (vantage point)", "nextTable": "qa_table", "diceroll": "1d100dc90", "note": "Good view of surrounding area. Q/A roll for points of interest. 10% NPC." },
       { "min": 65, "max": 71, "type": "Sharply jutting, rocky hills", "nextTable": null, "diceroll": null, "note": "Practically unscalable. Athletics DC 16 to scale; fall damage on failure." },
-      { "min": 72, "max": 78, "type": "Dry, low plateau", "nextTable": "monument_table", "diceroll": "1d100", "note": "Monument 25%." },
-      { "min": 79, "max": 85, "type": "Slightly wooded hills", "nextTable": "small_wood_table", "diceroll": "1d100", "note": "Small patches of forest. Easy encounter 25%." },
+      { "min": 72, "max": 78, "type": "Dry, low plateau", "nextTable": "monument_table", "diceroll": "1d100dc75", "note": "Monument 25%." },
+      { "min": 79, "max": 85, "type": "Slightly wooded hills", "nextTable": "small_wood_table", "diceroll": "1d100dc75", "note": "Small patches of forest. Easy encounter 25%." },
       { "min": 86, "max": 92, "type": "Burial mounds / Barrows", "nextTable": "qa_table", "diceroll": null, "note": "Q/A to determine nature; may lead to tunnels." },
       { "min": 93, "max": 100, "type": "Colony hills", "nextTable": "qa_table", "diceroll": "1d100", "note": "50% humanoid, otherwise burrowing beasts. Q/A to determine what lurks here." }
     ]
@@ -1403,7 +1405,7 @@
       { "min": 7, "max": 7, "type": "Blowhole", "nextTable": null, "diceroll": null, "note": "If not coastal, roll again." },
       { "min": 8, "max": 8, "type": "Volcano", "nextTable": "qa_table", "diceroll": "1d100", "note": "Active or dormant volcanic peak." },
       { "min": 9, "max": 9, "type": "Interesting rock formations", "nextTable": null, "diceroll": null, "note": "Possibly caused by ancient lava flow." },
-      { "min": 10, "max": 10, "type": "Manmade tunnel", "nextTable": "dungeon_generator", "diceroll": null, "note": "Artificial passage cut into the earth." },
+      { "min": 10, "max": 10, "type": "Manmade tunnel", "nextTable": "starting_area", "diceroll": null, "note": "Artificial passage cut into the earth." },
       { "min": 11, "max": 11, "type": "Crater", "nextTable": "qa_table", "diceroll": null, "note": "Likely caused by a meteor impact." },
       { "min": 12, "max": 12, "type": "Tar Pit", "nextTable": null, "diceroll": null, "note": "Sticky, dangerous natural asphalt pool." },
       { "min": 13, "max": 13, "type": "River source / spring", "nextTable": "waterway_table", "diceroll": null, "note": "Origin of a river or water going underground." },
@@ -1421,15 +1423,15 @@
     "die": "d100",
     "rollType": "standard",
     "entries": [
-      { "min": 1, "max": 50, "type": "Medium-sized lake, unmarked", "nextTable": "qa_table", "diceroll": "1d100", "note": "40% easy encounter. 10% NPC." },
+      { "min": 1, "max": 50, "type": "Medium-sized lake, unmarked", "nextTable": "qa_table", "diceroll": "1d100dc60,1d100dc90", "note": "40% easy encounter. 10% NPC." },
       { "min": 51, "max": 55, "type": "Medium lake with settlement", "nextTable": "unmarked_settlement_table", "diceroll": null, "note": "Roll on Unmarked Settlement Table." },
-      { "min": 56, "max": 60, "type": "Smallish lake / pond / watering hole", "nextTable": "qa_table", "diceroll": "1d100", "note": "30% medium encounter." },
-      { "min": 61, "max": 65, "type": "Large, unmapped lake with outlet", "nextTable": "waterway_table", "diceroll": "1d100", "note": "Waterway running out of it. 10% NPC. DC 19 Survival to craft canoe." },
-      { "min": 66, "max": 70, "type": "Medium lake with settlement", "nextTable": "unmarked_settlement_table", "diceroll": null, "note": "Roll on Unmarked Settlement Table, adding +20 to roll." },
+      { "min": 56, "max": 60, "type": "Smallish lake / pond / watering hole", "nextTable": "qa_table", "diceroll": "1d100dc70", "note": "30% medium encounter." },
+      { "min": 61, "max": 65, "type": "Large, unmapped lake with outlet", "nextTable": "waterway_table", "diceroll": "1d100dc90", "note": "Waterway running out of it. 10% NPC. DC 19 Survival to craft canoe." },
+      { "min": 66, "max": 70, "type": "Medium lake with settlement", "nextTable": "unmarked_settlement_table", "diceroll": "+20", "note": "Roll on Unmarked Settlement Table, adding +20 to roll." },
       { "min": 71, "max": 75, "type": "Large lake with mountains", "nextTable": "mountain_table", "diceroll": null, "note": "Small mountain range by its shores." },
       { "min": 76, "max": 80, "type": "Large lake with small woods", "nextTable": "small_wood_table", "diceroll": null, "note": "Roll on Small Woods Table." },
-      { "min": 81, "max": 85, "type": "Medium lake with many boats", "nextTable": "qa_table", "diceroll": "1d100", "note": "25% clue. 40% NPC." },
-      { "min": 86, "max": 90, "type": "Small lake/pond (Aquatic lair)", "nextTable": "monster_lair_table", "diceroll": "1d100", "note": "Lair for aquatic creature. 25% clue." },
+      { "min": 81, "max": 85, "type": "Medium lake with many boats", "nextTable": "qa_table", "diceroll": "1d100dc75,1d100dc60", "note": "25% clue. 40% NPC." },
+      { "min": 86, "max": 90, "type": "Small lake/pond (Aquatic lair)", "nextTable": "monster_lair_table", "diceroll": "1d100dc75", "note": "Lair for aquatic creature. 25% clue." },
       { "min": 91, "max": 95, "type": "Medium-sized lake (Fish jumping)", "nextTable": null, "diceroll": null, "note": "DC 15 Survival check to catch a fish." },
       { "min": 96, "max": 100, "type": "Sacred pool (Magical)", "nextTable": "qa_table", "diceroll": null, "note": "Q/A to discern rituals or magic user NPCs nearby." }
     ]
@@ -1439,24 +1441,24 @@
     "die": "d20",
     "rollType": "standard",
     "entries": [
-      { "min": 1, "max": 1, "type": "Standing stones / Obelisks / Large stone carvings", "nextTable": "qa_table", "diceroll": "1d100", "note": "Might have runes inscribed. 10% NPC." },
+      { "min": 1, "max": 1, "type": "Standing stones / Obelisks / Large stone carvings", "nextTable": "qa_table", "diceroll": "1d100dc90", "note": "Might have runes inscribed. 10% NPC." },
       { "min": 2, "max": 2, "type": "Charcoal burning mound", "nextTable": "qa_table", "diceroll": null, "note": "Q/A rolls to determine what is being burnt here? Orcs?" },
-      { "min": 3, "max": 3, "type": "Tribal totem pole", "nextTable": "qa_table", "diceroll": "1d100", "note": "25% easy encounter. Q/A to determine who is nearby." },
+      { "min": 3, "max": 3, "type": "Tribal totem pole", "nextTable": "qa_table", "diceroll": "1d100dc75", "note": "25% easy encounter. Q/A to determine who is nearby." },
       { "min": 4, "max": 4, "type": "Small Shrine", "nextTable": "qa_table", "diceroll": null, "note": "Q/A to determine deity and if currently attended." },
-      { "min": 5, "max": 5, "type": "Sign to nearby settlements", "nextTable": null, "diceroll": "1d100", "note": "50% chance a settlement is unmapped. Clue 10%." },
+      { "min": 5, "max": 5, "type": "Sign to nearby settlements", "nextTable": null, "diceroll": "1d100,1d100dc90", "note": "50% chance a settlement is unmapped. Clue 10%." },
       { "min": 6, "max": 6, "type": "Cliff face with carved god faces", "nextTable": "qa_table", "diceroll": null, "note": "Q/A to determine deity and if currently attended." },
       { "min": 7, "max": 7, "type": "Statue of ancient leader", "nextTable": "qa_table", "diceroll": null, "note": "History rolls to discern more." },
       { "min": 8, "max": 8, "type": "Statue of famous adventurer", "nextTable": "qa_table", "diceroll": null, "note": "Anything hidden here?" },
-      { "min": 9, "max": 9, "type": "Significant tribal tree / natural feature", "nextTable": null, "diceroll": "1d100", "note": "70% guarded by tribespeople / barbarians." },
+      { "min": 9, "max": 9, "type": "Significant tribal tree / natural feature", "nextTable": null, "diceroll": "1d100dc30", "note": "70% guarded by tribespeople / barbarians." },
       { "min": 10, "max": 10, "type": "Ancient Stone Pillars", "nextTable": "qa_table", "diceroll": null, "note": "Part of ruins? Q/A / History rolls to discern more." },
       { "min": 11, "max": 11, "type": "Ruined stone walls", "nextTable": "qa_table", "diceroll": null, "note": "Q/A / History rolls to discern more." },
       { "min": 12, "max": 12, "type": "Altar / Pedestal", "nextTable": null, "diceroll": "1d100", "note": "Sacrificial? 50% stained with blood." },
       { "min": 13, "max": 13, "type": "Large, scattered interesting boulders", "nextTable": "qa_table", "diceroll": null, "note": "Q/A / Nature rolls to discern more." },
-      { "min": 14, "max": 14, "type": "Single tomb of notable identity", "nextTable": null, "diceroll": "1d100", "note": "25% already looted." },
-      { "min": 15, "max": 15, "type": "Mountain of bones", "nextTable": "qa_table", "diceroll": "1d100", "note": "Q/A / Nature rolls to discern more. Clue 25%." },
-      { "min": 16, "max": 16, "type": "Ancient battlefield memorial", "nextTable": "qa_table", "diceroll": "1d100", "note": "Q/A / History rolls to discern more. Clue 25%." },
-      { "min": 17, "max": 17, "type": "Burnt down building", "nextTable": null, "diceroll": "1d100", "note": "Clue 50%." },
-      { "min": 18, "max": 18, "type": "Insect mound (Termite, etc.)", "nextTable": null, "diceroll": "1d100", "note": "50% easy encounter (insect-like being)." },
+      { "min": 14, "max": 14, "type": "Single tomb of notable identity", "nextTable": null, "diceroll": "1d100dc75", "note": "25% already looted." },
+      { "min": 15, "max": 15, "type": "Mountain of bones", "nextTable": "qa_table", "diceroll": "1d100dc75", "note": "Q/A / Nature rolls to discern more. Clue 25%." },
+      { "min": 16, "max": 16, "type": "Ancient battlefield memorial", "nextTable": "qa_table", "diceroll": "1d100dc75", "note": "Q/A / History rolls to discern more. Clue 25%." },
+      { "min": 17, "max": 17, "type": "Burnt down building", "nextTable": null, "diceroll": "1d100dc50", "note": "Clue 50%." },
+      { "min": 18, "max": 18, "type": "Insect mound (Termite, etc.)", "nextTable": null, "diceroll": "1d100dc50", "note": "50% easy encounter (insect-like being)." },
       { "min": 19, "max": 19, "type": "Ley lines", "nextTable": "qa_table", "diceroll": null, "note": "Q/A to discern origin and age." },
       { "min": 20, "max": 20, "type": "Lone archway", "nextTable": "qa_table", "diceroll": null, "note": "Portal? In the middle of nowhere." }
     ]
@@ -1488,7 +1490,7 @@
       { "min": 59, "max": 65, "type": "Small wood atop outcrop", "nextTable": "small_wood_table", "diceroll": null, "note": "Roll on Small Wood table." },
       { "min": 66, "max": 71, "type": "Structure or monument on top", "nextTable": "structure_table,monument_table", "diceroll": "1d100", "note": "50% structure, 50% monument if scaled." },
       { "min": 72, "max": 77, "type": "Island outcrop", "nextTable": "lake_table", "diceroll": null, "note": "Rocky outcrop is actually an island in the middle of a lake." },
-      { "min": 78, "max": 83, "type": "Assortment of large boulders", "nextTable": "qa_table", "diceroll": "1d100", "note": "Scattered around. 50% medium encounter (possibly with surprise)." },
+      { "min": 78, "max": 83, "type": "Assortment of large boulders", "nextTable": "qa_table", "diceroll": "1d100dc50", "note": "Scattered around. 50% medium encounter (possibly with surprise)." },
       { "min": 84, "max": 89, "type": "Standing stones formation", "nextTable": null, "diceroll": null, "note": "Atop the outcrop. DC 12 Survival check to scale and investigate." },
       { "min": 90, "max": 95, "type": "NPC beckoning", "nextTable": "qa_table", "diceroll": null, "note": "An NPC stands atop and is calling out to you." },
       { "min": 96, "max": 100, "type": "God-form outcrop", "nextTable": "qa_table", "diceroll": "1d100", "note": "Fashioned into a god's form. 50% worshippers present. Shrine atop?" }
@@ -1501,11 +1503,11 @@
     "entries": [
       { "min": 1, "max": 55, "type": "Standard small mountain range", "nextTable": null, "diceroll": null, "note": "Uniform size, no huge peaks. DC 16 Survival and gear to scale." },
       { "min": 56, "max": 60, "type": "Small mountain range (large peaks)", "nextTable": null, "diceroll": null, "note": "Possesses some large peaks. DC 16 Survival and gear to scale." },
-      { "min": 61, "max": 65, "type": "Mountain range with many caves", "nextTable": "dungeon_generator", "diceroll": null, "note": "Caves might lead to tunnels / dungeons." },
+      { "min": 61, "max": 65, "type": "Mountain range with many caves", "nextTable": "starting_area", "diceroll": null, "note": "Caves might lead to tunnels / dungeons." },
       { "min": 66, "max": 70, "type": "Mountain colony / settlement", "nextTable": "unmarked_settlement_table", "diceroll": null, "note": "Dwarven or mountain creatures. Roll on Unmarked Settlement table." },
       { "min": 71, "max": 75, "type": "Forested mountain range", "nextTable": "small_wood_table", "diceroll": null, "note": "Roll on Small Wood Table." },
-      { "min": 76, "max": 80, "type": "Rugged, dangerous partially wooded range", "nextTable": null, "diceroll": "1d100", "note": "Giant eagles and the like. Hard encounter 50%." },
-      { "min": 81, "max": 85, "type": "Bandit / Raider hideout", "nextTable": null, "diceroll": "1d100", "note": "Perception DC 18 to discern. Hard encounter 70%." },
+      { "min": 76, "max": 80, "type": "Rugged, dangerous partially wooded range", "nextTable": null, "diceroll": "1d100dc50", "note": "Giant eagles and the like. Hard encounter 50%." },
+      { "min": 81, "max": 85, "type": "Bandit / Raider hideout", "nextTable": null, "diceroll": "1d100dc30", "note": "Perception DC 18 to discern. Hard encounter 70%." },
       { "min": 86, "max": 90, "type": "Small mountain range by lake", "nextTable": "lake_table", "diceroll": null, "note": "Roll on Lake Table." },
       { "min": 91, "max": 95, "type": "Colony of Giants / humanoids", "nextTable": "qa_table", "diceroll": null, "note": "Q/A rolls to find out more." },
       { "min": 96, "max": 100, "type": "Special Mountain Feature (d8 roll)", "nextTable": "qa_table", "diceroll": "1d8", "note": "1: Monastery, 2: Wizard tower, 3: Hidden town, 4: Druids, 5: Dwarven kingdom, 6: Gnomish kingdom, 7: Assassin citadel, 8: Custom." }
@@ -1518,13 +1520,13 @@
     "entries": [
       { "min": 1, "max": 55, "type": "Standard wood", "nextTable": null, "diceroll": null, "note": "Standard type of wood for this area." },
       { "min": 56, "max": 60, "type": "Diseased wood", "nextTable": "qa_table", "diceroll": null, "note": "Trees dead via mysterious disease. Q/A rolls to determine nature." },
-      { "min": 61, "max": 65, "type": "Ancient wood", "nextTable": null, "diceroll": "1d100", "note": "Twisted, gnarled trees. Clue 25%." },
+      { "min": 61, "max": 65, "type": "Ancient wood", "nextTable": null, "diceroll": "1d100dc75", "note": "Twisted, gnarled trees. Clue 25%." },
       { "min": 66, "max": 70, "type": "Serene, Sylvan wood", "nextTable": "qa_table", "diceroll": null, "note": "Q/A rolls to check for signs of life." },
-      { "min": 71, "max": 75, "type": "Dark, thick wood", "nextTable": null, "diceroll": "1d100", "note": "Full of menace. Hard encounter 20%." },
+      { "min": 71, "max": 75, "type": "Dark, thick wood", "nextTable": null, "diceroll": "1d100dc80", "note": "Full of menace. Hard encounter 20%." },
       { "min": 76, "max": 80, "type": "Logging wood", "nextTable": "qa_table", "diceroll": null, "note": "In process of being clearfelled. Q/A rolls to determine who/why." },
       { "min": 81, "max": 85, "type": "Fire-ravaged wood", "nextTable": "qa_table", "diceroll": null, "note": "Ravaged by forest fire. Q/A rolls to determine cause." },
-      { "min": 86, "max": 90, "type": "Raider hideout", "nextTable": null, "diceroll": "1d100", "note": "Band of raiding humanoids hiding. Clue 50%. Medium encounter 35%." },
-      { "min": 91, "max": 95, "type": "Wood with clearing", "nextTable": "clearing_table", "diceroll": "1d100", "note": "Contains totem / standing stones. Medium encounter 25%, Clue 10%." },
+      { "min": 86, "max": 90, "type": "Raider hideout", "nextTable": null, "diceroll": "1d100dc50,1d100dc65", "note": "Band of raiding humanoids hiding. Clue 50%. Medium encounter 35%." },
+      { "min": 91, "max": 95, "type": "Wood with clearing", "nextTable": "clearing_table", "diceroll": "1d100dc75,1d100dc90", "note": "Contains totem / standing stones. Medium encounter 25%, Clue 10%." },
       { "min": 96, "max": 100, "type": "Inhabited wood", "nextTable": "qa_table", "diceroll": null, "note": "Elves, gnomes, or halfling settlement. Q/A rolls to determine meeting." }
     ]
   },
@@ -1544,8 +1546,8 @@
       { "min": 33, "max": 36, "type": "Fence", "nextTable": "qa_table", "diceroll": null, "note": "Purpose: Q/A roll or Nature roll" },
       { "min": 37, "max": 40, "type": "Windmill", "nextTable": null, "diceroll": null, "note": "Standard structure" },
       { "min": 41, "max": 44, "type": "Watermill", "nextTable": "waterway_table", "diceroll": null, "note": "Roll on Waterway Table" },
-      { "min": 45, "max": 48, "type": "Old well", "nextTable": null, "diceroll": "1d100", "note": "50% hidden cave/tunnel, 30% clue" },
-      { "min": 49, "max": 52, "type": "Hermit Hut / Cave", "nextTable": null, "diceroll": "1d100", "note": "70% inhabited, 40% clue" },
+      { "min": 45, "max": 48, "type": "Old well", "nextTable": null, "diceroll": "1d100,1d100dc70", "note": "50% hidden cave/tunnel, 30% clue" },
+      { "min": 49, "max": 52, "type": "Hermit Hut / Cave", "nextTable": null, "diceroll": "1d100,1d100dc60", "note": "70% inhabited, 40% clue" },
       { "min": 53, "max": 56, "type": "Lone tavern / inn", "nextTable": null, "diceroll": "1d100", "note": "90% inhabited" },
       { "min": 57, "max": 60, "type": "Hunting Cabin / Fishing Hut", "nextTable": null, "diceroll": "1d100", "note": "25% inhabited" },
       { "min": 61, "max": 64, "type": "Hideout / Bunker", "nextTable": null, "diceroll": null, "note": "DC 16 Perception to notice" },
@@ -1555,7 +1557,7 @@
       { "min": 77, "max": 80, "type": "Medium Bridge", "nextTable": "waterway_table", "diceroll": null, "note": "Roll on Waterways Table" },
       { "min": 81, "max": 84, "type": "Large Bridge", "nextTable": "waterway_table", "diceroll": null, "note": "Roll on Waterways Table" },
       { "min": 85, "max": 88, "type": "Large Castle / Keep", "nextTable": null, "diceroll": "1d100", "note": "80% inhabited" },
-      { "min": 89, "max": 92, "type": "Ruins", "nextTable": null, "diceroll": "1d100", "note": "50% hard encounter, 10% deadly, 60% clue" },
+      { "min": 89, "max": 92, "type": "Ruins", "nextTable": null, "diceroll": "1d100,1d100dc60", "note": "50% hard encounter, 10% deadly, 60% clue" },
       { "min": 93, "max": 96, "type": "Burial Mounds / Barrows", "nextTable": "situations_master_table", "diceroll": null, "note": "Determine contents" },
       { "min": 97, "max": 100, "type": "Wizard Tower", "nextTable": null, "diceroll": "1d100", "note": "Inhabited, 60% friendly" }
     ]
@@ -1565,13 +1567,13 @@
     "die": "d100",
     "rollType": "standard",
     "entries": [
-      { "min": 1, "max": 50, "type": "Standard swamp", "nextTable": null, "diceroll": "1d100", "note": "Difficult terrain (half movement). 25% easy encounter." },
+      { "min": 1, "max": 50, "type": "Standard swamp", "nextTable": null, "diceroll": "1d100dc75", "note": "Difficult terrain (half movement). 25% easy encounter." },
       { "min": 51, "max": 57, "type": "Thick, dense swamp", "nextTable": null, "diceroll": null, "note": "Extremely difficult terrain; movement slowed to quarter speed." },
-      { "min": 58, "max": 64, "type": "Patchy swamp with dry areas", "nextTable": null, "diceroll": "1d100", "note": "Perfect for raider camps. Hard encounter 50%. Clue 30%." },
+      { "min": 58, "max": 64, "type": "Patchy swamp with dry areas", "nextTable": null, "diceroll": "1d100dc50,1d100dc70", "note": "Perfect for raider camps. Hard encounter 50%. Clue 30%." },
       { "min": 65, "max": 71, "type": "Wetland with ponds and waterways", "nextTable": "waterway_table", "diceroll": null, "note": "DC 19 Survival check to craft kayak, otherwise travel time added." },
-      { "min": 72, "max": 78, "type": "Dark, eerie swamp (Eldritch aura)", "nextTable": "qa_table", "diceroll": "1d100", "note": "Something evil hides here. Clue 10%." },
-      { "min": 79, "max": 85, "type": "Ancient/Primeval swamp", "nextTable": null, "diceroll": "1d100", "note": "A land forgotten by time. Hard encounter 50%." },
-      { "min": 86, "max": 92, "type": "Fey Oasis", "nextTable": null, "diceroll": "1d100", "note": "50% Fey encounter. DC 16 Wisdom save or get lost." },
+      { "min": 72, "max": 78, "type": "Dark, eerie swamp (Eldritch aura)", "nextTable": "qa_table", "diceroll": "1d100dc90", "note": "Something evil hides here. Clue 10%." },
+      { "min": 79, "max": 85, "type": "Ancient/Primeval swamp", "nextTable": null, "diceroll": "1d100dc50", "note": "A land forgotten by time. Hard encounter 50%." },
+      { "min": 86, "max": 92, "type": "Fey Oasis", "nextTable": null, "diceroll": "1d100dc50", "note": "50% Fey encounter. DC 16 Wisdom save or get lost." },
       { "min": 93, "max": 100, "type": "Hidden humanoid settlement", "nextTable": "qa_table", "diceroll": null, "note": "Inhabited by those who wish to remain hidden. Q/A rolls to determine meeting." }
     ]
   },
@@ -3191,7 +3193,9 @@ let CATEGORY_LIBRARY = {
             'qa_table', 
             'a_npc_generator', 
             'situations_master_table', 
-            'keyword_master_table'
+            'keyword_master_table',
+            "clue_table",
+            "wilderness_clue_table"
         ];
 
         // 2. If the table you just rolled is pinned, STOP here.
@@ -3331,49 +3335,7 @@ let CATEGORY_LIBRARY = {
             // Load the recents UI
             renderRecentChips();
         }, 100); 
-    });
-
-    // Quick Search Logic
-    document.getElementById('tableSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const select = document.getElementById('tableSelect');
-        const optgroups = select.getElementsByTagName('optgroup');
-        let firstVisible = null;
-
-        for (let group of optgroups) {
-            let hasVisibleOption = false;
-            const options = group.getElementsByTagName('option');
-            
-            for (let opt of options) {
-                const text = opt.textContent.toLowerCase();
-                if (text.includes(searchTerm)) {
-                    opt.style.display = ""; // Show
-                    hasVisibleOption = true;
-                    if (!firstVisible) firstVisible = opt;
-                } else {
-                    opt.style.display = "none"; // Hide
-                }
-            }
-            
-            // Hide the whole category if no tables match
-            group.style.display = hasVisibleOption ? "" : "none";
-        }
-
-        // Auto-select the first result so you can just hit "Roll"
-        if (firstVisible && searchTerm !== "") {
-            select.value = firstVisible.value;
-            updateInfoPanel();
-        }
-    });
-
-    // Optional: Press "Enter" in search box to trigger the Roll button
-    document.getElementById('tableSearch').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            performRoll();
-        }
-    });
-
-    
+    });    
 
     // ================================
     // 9. TESTER
@@ -3429,7 +3391,8 @@ if (suspicious.length === 0) {
     const missing = [];
     const knownmissing = new Set([
         "monster_generator",
-        "magic_item_table_check"
+        "magic_item_table_check",
+        "monster_lair_table"
     ]);
     const existingKeys = new Set(Object.keys(FULL_LIBRARY));
     
