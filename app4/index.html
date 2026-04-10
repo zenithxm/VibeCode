@@ -185,6 +185,44 @@
             border-radius: 1rem;
             border-left: 4px solid #d45a3a;
         }
+
+        .menu-category {
+            margin-bottom: 25px;
+        }
+        .menu-category-title {
+            color: #826349;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid #3e3129;
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 10px;
+        }
+        .menu-item {
+            background: #1f1814;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 1px solid #3a2c24;
+            transition: 0.2s;
+        }
+        .menu-item:hover {
+            background: #3e3129;
+            border-color: #c9aa7b;
+            transform: translateY(-2px);
+        }
+        .menu-item.selected {
+            border-color: #c9aa7b;
+            background: #2c2520;
+            box-shadow: inset 0 0 10px rgba(201, 170, 123, 0.2);
+        }
+
+
         .history-area {
             flex: 1;
             background: #1a1411;
@@ -218,18 +256,124 @@
             white-space: pre-wrap;
             font-family: monospace;
         }
+
+        /* Update these specific parts in your <style> block */
+        .quick-bar {
+            display: flex;
+            flex-direction: column; /* Stack Pinned on top of Recent */
+            gap: 5px;
+            padding: 10px 10px;
+            background: #1f1814;
+            border-bottom: 2px solid #3e3129;
+        }
+
+        .quick-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .row-label {
+            color: #7a5d48;
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: bold;
+            min-width: 55px; /* Keeps labels aligned */
+            flex-shrink: 0;
+        }
+
+        .recent-scroll-container {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            flex: 1;
+            scrollbar-width: none; /* Firefox */
+            white-space: nowrap;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 1px; /* Prevent shadow clipping */
+        }
+
+        .recent-scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome/Safari */
+        }
+
+        .quick-chip {
+            flex-shrink: 0;
+            background: #2b211c;
+            border: 1px solid #5e4b3c;
+            padding: 5px 10px;
+            border-radius: 60px;
+            font-size: 0.7rem;
+            color: #c9aa7b;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .quick-chip.permanent {
+            border-color: #c9aa7b;
+            background: #3e3129;
+            font-weight: bold;
+        }
+
+        .quick-chip:hover {
+            background: #c9aa7b;
+            color: #1f1814;
+            border-color: #fff;
+        }
     </style>
 </head>
 <body>
 <div class="container">
     <div class="header"><h1>📜 SOLO ADVENTURER'S TOOLBOX</h1></div>
+    <div class="quick-bar">
+        <div class="quick-row">
+            <!-- <span class="row-label">Pinned</span> -->
+            <div style="display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;">
+                <div class="quick-chip permanent" onclick="quickRoll('qa_table')">❓ Oracle</div>
+                <div class="quick-chip permanent" onclick="quickRoll('a_npc_generator')">👤 NPC</div>
+                <div class="quick-chip permanent" onclick="quickRoll('situations_master_table')">⚡ Situation</div>
+                <div class="quick-chip permanent" onclick="quickRoll('keyword_master_table')">🔑 Keyword</div>
+            </div>
+        </div>
+
+        <div class="quick-row" id="recentRow" style="border-top: 1px solid #2b211c; padding-top: 8px; display: none;">
+            <!-- <span class="row-label">Recent</span> -->
+            <div id="recentChips" class="recent-scroll-container">
+            </div>
+        </div>
+    </div>
     <div class="toolbar">
-        <div class="select-group">
+        <!-- <div class="select-group">
             <select id="tableSelect" disabled><option>Loading tables...</option></select>
+        </div> -->
+        <div class="select-group">
+            <label>Current Table</label>
+            <button id="menuTrigger" style="width: 100%; text-align: left; background: #2b211c; display: flex; justify-content: space-between; align-items: center;">
+                <span id="currentTargetName">Select a Table...</span>
+                <span>▼</span>
+            </button>
         </div>
         <div><button id="rollBtn" disabled>🎲 ROLL FROM TABLE</button></div>
         <div><button id="testBtn" disabled>🔍 TEST COVERAGE</button></div>
+        <select id="tableSelect" style="display:none"></select>
     </div>
+    <div id="megaMenu" style="display:none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(14, 11, 9, 0.98); z-index: 9999; flex-direction: column; padding: 20px;">
+        <div style="max-width: 800px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; height: 100%;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="color: #c9aa7b; margin: 0;">Library Explorer</h2>
+                <button onclick="toggleMenu()" style="background: none; border: none; font-size: 2rem; color: #7a5d48;">&times;</button>
+            </div>
+            
+            <input type="text" id="megaSearch" placeholder="Search tables (e.g. 'NPC', 'Wild', 'Quest')..." 
+                  style="width: 100%; background: #2b211c; border: 2px solid #7a5d48; padding: 15px 25px; border-radius: 12px; color: #fff; font-size: 1.2rem; margin-bottom: 20px; outline: none;">
+            
+            <div id="menuContent" style="flex: 1; overflow-y: auto; padding-right: 10px;">
+            </div>
+        </div>
+    </div>
+
     <div class="info-panel" id="infoPanel" style="display:none">
         <span>📏 Roll type: <strong id="rollTypeLabel">—</strong></span>
         <span>🎲 Die: <strong id="dieLabel">—</strong></span>
@@ -382,7 +526,7 @@
     ]
   },
   "rumour_location_table": {
-    "tableName": "Rumour Location Table",
+    "tableName": "Rumour Location",
     "die": "d12",
     "rollType": "standard",
     "entries": [
@@ -628,7 +772,7 @@
     ]
   },
   "quest_generation": {
-    "tableName": "Quest Generation Table",
+    "tableName": "Quest Generation",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -660,7 +804,7 @@
     ]
   },
   "quest_source": {
-    "tableName": "Quest Source Table",
+    "tableName": "Quest Source",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -699,7 +843,7 @@
     ]
   },
   "dungeon_size": {
-    "tableName": "Dungeon Size Table",
+    "tableName": "Dungeon Size",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -712,7 +856,7 @@
     ]
   },
   "dungeon_type": {
-    "tableName": "Dungeon Type Table",
+    "tableName": "Dungeon Type",
     "die": "d10",
     "rollType": "standard",
     "entries": [
@@ -750,7 +894,7 @@
     ]
   },
   "passage_table": {
-    "tableName": "Passage Table",
+    "tableName": "Passage",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -777,7 +921,7 @@
     ]
   },
   "passage_contents_table": {
-    "tableName": "Passage Contents Table",
+    "tableName": "Passage Contents",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -793,7 +937,7 @@
     ]
   },
   "door_table": {
-    "tableName": "Door Table",
+    "tableName": "Door",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -815,7 +959,7 @@
     ]
   },
   "opens_door_table": {
-    "tableName": "Opens Door Table",
+    "tableName": "Opens Door",
     "die": "d4",
     "rollType": "standard",
     "entries": [
@@ -825,7 +969,7 @@
     ]
   },
   "stairs_table": {
-    "tableName": "Stairs Table",
+    "tableName": "Stairs",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -845,7 +989,7 @@
     ]
   },
   "room_table": {
-    "tableName": "Room Table",
+    "tableName": "Room",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -865,7 +1009,7 @@
     ]
   },
   "room_contents_table": {
-    "tableName": "Room Contents Table",
+    "tableName": "Room Contents",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -908,7 +1052,7 @@
     ]
   },
   "random_architecture_table": {
-    "tableName": "Random Architecture / Feature Table",
+    "tableName": "Random Architecture / Feature",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -935,7 +1079,7 @@
     ]
   },
   "secret_door_table": {
-    "tableName": "Secret Door Table",
+    "tableName": "Secret Door",
     "die": "d6",
     "rollType": "standard",
     "entries": [
@@ -945,7 +1089,7 @@
     ]
   },
   "clue_table": {
-    "tableName": "Clue from Corpse Table",
+    "tableName": "Clue from Corpse",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1186,7 +1330,7 @@
     ]
   },
   "clearfelled_area_table": {
-    "tableName": "Clearfelled Area Table",
+    "tableName": "Clearfelled Area",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1199,7 +1343,7 @@
     ]
   },
   "clearing_table": {
-    "tableName": "Clearing Table",
+    "tableName": "Clearing",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1216,7 +1360,7 @@
     ]
   },
   "gully_table": {
-    "tableName": "Gully Table",
+    "tableName": "Gully",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1231,7 +1375,7 @@
     ]
   },
   "hills_table": {
-    "tableName": "Hills Table",
+    "tableName": "Hills",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1246,7 +1390,7 @@
     ]
   },
   "interesting_landscape_table": {
-    "tableName": "Interesting Landscape Feature Table",
+    "tableName": "Interesting Landscape Feature",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -1273,7 +1417,7 @@
     ]
   },
   "lake_table": {
-    "tableName": "Lake Table",
+    "tableName": "Lake",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1291,7 +1435,7 @@
     ]
   },
   "monument_table": {
-    "tableName": "Monument Table",
+    "tableName": "Monument",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -1318,7 +1462,7 @@
     ]
   },
   "oasis_table": {
-    "tableName": "Oasis Table",
+    "tableName": "Oasis",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1335,7 +1479,7 @@
     ]
   },
   "rocky_table": {
-    "tableName": "Rocky Outcrop Table",
+    "tableName": "Rocky Outcrop",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1351,7 +1495,7 @@
     ]
   },
   "mountain_table": {
-    "tableName": "Small Mountain Range / Foothills Table",
+    "tableName": "Small Mountain Range / Foothills",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1368,7 +1512,7 @@
     ]
   },
   "small_wood_table": {
-    "tableName": "Small Wood Table",
+    "tableName": "Small Wood",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1385,7 +1529,7 @@
     ]
   },
   "structure_table": {
-    "tableName": "Structure Table",
+    "tableName": "Structure",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1417,7 +1561,7 @@
     ]
   },
   "swamp_table": {
-    "tableName": "Swamp Table",
+    "tableName": "Swamp",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1432,7 +1576,7 @@
     ]
   },
   "unmarked_settlement_table": {
-    "tableName": "Unmarked Settlement Table",
+    "tableName": "Unmarked Settlement",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1452,7 +1596,7 @@
     ]
   },
   "waterway_table": {
-    "tableName": "Waterway Table",
+    "tableName": "Waterway",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1470,7 +1614,7 @@
     ]
   },
   "active_area_discovery_table": {
-    "tableName": "Active Area Discovery Table",
+    "tableName": "Active Area Discovery",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1491,7 +1635,7 @@
     ]
   },
   "wilderness_clue_table": {
-    "tableName": "Wilderness Clue Table",
+    "tableName": "Wilderness Clue",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1599,7 +1743,7 @@
   },
 
   "emotions_table": {
-    "tableName": "Emotions Table",
+    "tableName": "Emotions",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1656,7 +1800,7 @@
     ]
   },
   "profession_table": {
-    "tableName": "Profession Table",
+    "tableName": "Profession",
     "die": "d100",
     "rollType": "standard",
     "entries": [
@@ -1713,7 +1857,7 @@
     ]
   },
   "class_table": {
-    "tableName": "Class Table",
+    "tableName": "Class",
     "die": "d12",
     "rollType": "standard",
     "entries": [
@@ -1733,7 +1877,7 @@
   },
 
   "element_interaction_table": {
-    "tableName": "Element Interaction Table",
+    "tableName": "Element Interaction",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -1923,7 +2067,7 @@
     ]
   },  
   "traps_table": {
-    "tableName": "Trap Table",
+    "tableName": "Trap",
     "die": "d100",
     "rollType": "multi-column",
     "columns": ["Trap Type", "Notice DC", "Save DC", "Damage"],
@@ -1948,7 +2092,7 @@
   },
 
   "regional_race_discovery_table": {
-    "tableName": "Regional Race Discovery Table",
+    "tableName": "Regional Race Discovery",
     "die": "d100",
     "rollType": "multi-column",
     "columns": ["Urban/Trade", "Mountain/Industrial", "Forest/Sylvan", "Wasteland/Tribal", "Exotic/Celestial"],
@@ -2015,7 +2159,7 @@
 
 
   "level_tier_table": {
-    "tableName": "Level Tier Table",
+    "tableName": "Level Tier",
     "die": "d20",
     "rollType": "standard",
     "entries": [
@@ -2025,7 +2169,7 @@
     ]
   },
   "level_by_tier_table": {
-    "tableName": "Level By Tier Table",
+    "tableName": "Level By Tier",
     "die": "d20",
     "rollType": "multi-column",
     "columns": ["Early (1-5)", "Mid (5-15)", "Late (15-20)"],
@@ -2095,7 +2239,7 @@
   },
 
   "location_events_table": {
-    "tableName": "Location Events Table",
+    "tableName": "Location Events",
     "die": "d100",
     "rollType": "multi-column",
     "columns": ["Urban", "Wilderness", "Dungeon"],
@@ -2166,7 +2310,7 @@
     ]
   },
   "situations_deltail_table": {
-    "tableName": "Situations Multi-Column Verb Table",
+    "tableName": "Situations Multi-Column Verb",
     "die": "d100",
     "rollType": "multi-column",
     "columns": ["0-99", "100-199", "200-299", "300-399", "400-499"],
@@ -2275,7 +2419,7 @@
   },
 
   "keyword_master_table": {
-    "tableName": "Keyword Master Table",
+    "tableName": "Keyword Master",
     "die": "d8",
     "rollType": "standard",
     "entries": [
@@ -2290,7 +2434,7 @@
     ]
   },
   "keyword_detail_table": {
-    "tableName": "Keyword Detail Table",
+    "tableName": "Keyword Detail",
     "die": "d100",
     "rollType": "multi-column",
     "columns": ["0-99", "100-199", "200-299", "300-399", "400-499", "500-599", "600-699", "700-799"],
@@ -2512,10 +2656,10 @@
 }
 
 let CATEGORY_LIBRARY = {
-  "Oracle / Clue": ["qa_table","situations_master_table","keyword_master_table", "clue_table", "wilderness_clue_table"],
   "NPC": ["a_npc_generator", "a_adv_generator"],
+  "Oracle / Clue": ["qa_table","situations_master_table","keyword_master_table", "clue_table", "wilderness_clue_table"],
   "Quest": ["a_quest_generator", "rumour_subject", "active_area_discovery_table"],  
-  "Location": ["unmarked_settlement", "structure_table", "waterway_table", "active_area_discovery_table", "tavern_name_generator", "tavern_details"],
+  "Location": ["unmarked_settlement", "active_area_discovery_table", "tavern_name_generator", "tavern_details"],
   "Encounter": ["wilderness_encounters", "urban_encounters", "dungeon_encounters"],
   "Event": ["active_area_discovery_table", "what_wakes_you", "element_interaction_table", "location_events_table", "weather_table"],
   "Dungeon": ["dungeon_encounters", "dungeon_size", "dungeon_type", "passage_or_room_check", "starting_area", "passage_table", "passage_contents_table", "door_table", "opens_door_table", "stairs_table", "room_table", "room_contents_table", "obstacles_table", "random_architecture_table", "secret_door_table", "door_status_details", "traps_table"],
@@ -2698,6 +2842,80 @@ let CATEGORY_LIBRARY = {
     // ================================
     let rollHistory = [];
 
+    // Toggle Menu visibility
+    function toggleMenu() {
+        const menu = document.getElementById('megaMenu');
+        const isOpen = menu.style.display === 'flex';
+        menu.style.display = isOpen ? 'none' : 'flex';
+        if (!isOpen) {
+            document.getElementById('megaSearch').focus();
+            renderMenu(); // Re-render to ensure highlights are correct
+        }
+    }
+
+    document.getElementById('menuTrigger').addEventListener('click', toggleMenu);
+
+    // Render the big page of groups
+    function renderMenu(filter = "") {
+        const container = document.getElementById('menuContent');
+        const select = document.getElementById('tableSelect');
+        const groups = select.querySelectorAll('optgroup');
+        let html = "";
+
+        groups.forEach(group => {
+            const options = Array.from(group.querySelectorAll('option'));
+            const filteredOptions = options.filter(opt => 
+                opt.textContent.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filteredOptions.length > 0) {
+                html += `<div class="menu-category">
+                    <div class="menu-category-title">${group.label}</div>
+                    <div class="menu-grid">`;
+                
+                filteredOptions.forEach(opt => {
+                    const isSelected = select.value === opt.value;
+                    html += `
+                        <div class="menu-item ${isSelected ? 'selected' : ''}" 
+                            onclick="selectFromMenu('${opt.value}', '${opt.textContent}')">
+                            ${opt.textContent}
+                        </div>`;
+                });
+                
+                html += `</div></div>`;
+            }
+        });
+        container.innerHTML = html || "<div style='text-align:center; color:#7a5d48; margin-top:40px;'>No tables match your search.</div>";
+    }
+
+    // When a user clicks a table in the mega menu
+    function selectFromMenu(val, name) {
+        const select = document.getElementById('tableSelect');
+        const display = document.getElementById('currentTargetName');
+        if (select) select.value = val;
+        if (display) display.textContent = name;
+        
+        toggleMenu(); 
+        if (typeof updateInfoPanel === "function") updateInfoPanel();
+        addToRecents(val); 
+    }
+
+    // Live Search logic
+    document.getElementById('megaSearch').addEventListener('input', (e) => {
+        renderMenu(e.target.value);
+    });
+
+    // Update the initial table name on load
+    window.addEventListener('load', () => {
+        setTimeout(() => {
+            const select = document.getElementById('tableSelect');
+            if (select.options[select.selectedIndex]) {
+                document.getElementById('currentTargetName').textContent = select.options[select.selectedIndex].text;
+                document.getElementById('menuTrigger').disabled = false;
+            }
+        }, 500); // Small delay to wait for your library loader
+    });
+
     function populateSelect() {
         const select = document.getElementById('tableSelect');
         select.innerHTML = '';
@@ -2738,7 +2956,8 @@ let CATEGORY_LIBRARY = {
                 const display = tbl.tableName || key;
                 const option = document.createElement('option');
                 option.value = key;
-                option.textContent = `${display} (${key})`;
+                //option.textContent = `${display} (${key})`;
+                option.textContent = `${display}`;
                 group.appendChild(option);
             });
             select.appendChild(group);
@@ -2917,6 +3136,112 @@ let CATEGORY_LIBRARY = {
         document.getElementById('resultOutput').innerHTML = `<div class="test-output">${escapeHtml(output)}</div>`;
     }
 
+
+    // ================================
+    // 5.5. QUICK ACCESS CATEGORY
+    // ================================
+    function quickRoll(tableKey) {
+        const select = document.getElementById('tableSelect');
+        const tableData = FULL_LIBRARY[tableKey];
+        if (!tableData) return;
+        
+        if (select) select.value = tableKey;
+        const display = document.getElementById('currentTargetName');
+        // FIX: Use tableName here too
+        if (display) display.textContent = tableData.tableName; 
+        
+        if (typeof updateInfoPanel === "function") updateInfoPanel();
+        if (typeof performRoll === "function") performRoll();
+        addToRecents(tableKey);
+    }
+
+    let recentTables = JSON.parse(localStorage.getItem('recentTables') || '[]');
+
+    function renderRecentChips() {
+        const container = document.getElementById('recentChips');
+        const recentRow = document.getElementById('recentRow');
+        if (!container || !recentRow) return;
+        
+        // If no history, hide the whole second line
+        if (recentTables.length === 0) {
+            recentRow.style.display = 'none';
+            return;
+        }
+
+        // Otherwise, show the line and build the chips
+        recentRow.style.display = 'flex';
+        container.innerHTML = '';
+        
+        recentTables.forEach(tableKey => {
+            const tableData = FULL_LIBRARY[tableKey];
+            if (!tableData) return;
+
+            const chip = document.createElement('div');
+            chip.className = 'quick-chip';
+            const name = tableData.tableName || "Unknown Table";
+            chip.textContent = name.length > 22 ? name.substring(0, 20) + '...' : name;
+            chip.onclick = () => quickRoll(tableKey);
+            container.appendChild(chip);
+        });
+    }
+
+    function addToRecents(tableKey) {
+        // 1. Define your pinned keys exactly as they appear in your HTML
+        const pinnedKeys = [
+            'qa_table', 
+            'a_npc_generator', 
+            'situations_master_table', 
+            'keyword_master_table'
+        ];
+
+        // 2. If the table you just rolled is pinned, STOP here.
+        if (pinnedKeys.includes(tableKey)) return;
+
+        // 3. Otherwise, proceed with history logic
+        // Remove if already exists (to move it to the front)
+        recentTables = recentTables.filter(key => key !== tableKey);
+        
+        // Add to start of array
+        recentTables.unshift(tableKey);
+        
+        // Keep only last 10
+        if (recentTables.length > 10) {
+            recentTables.pop();
+        }
+        
+        // Save to browser memory
+        localStorage.setItem('recentTables', JSON.stringify(recentTables));
+        
+        // Refresh the UI
+        renderRecentChips();
+    }
+
+    // 3. Update your existing selection logic
+    // Find your previous selectFromMenu and quickRoll functions and update them:
+
+    function selectFromMenu(val, name) {
+        const select = document.getElementById('tableSelect');
+        select.value = val;
+        document.getElementById('currentTargetName').textContent = name;
+        toggleMenu(); 
+        updateInfoPanel();
+        addToRecents(val); // <--- Add this
+    }
+
+    function quickRoll(tableKey) {
+        const select = document.getElementById('tableSelect');
+        if (!FULL_LIBRARY[tableKey]) return;
+        
+        select.value = tableKey;
+        document.getElementById('currentTargetName').textContent = FULL_LIBRARY[tableKey].name;
+        updateInfoPanel();
+        performRoll();
+        addToRecents(tableKey); // <--- Add this
+    }
+
+    // Initialize chips on page load
+    window.addEventListener('DOMContentLoaded', renderRecentChips);
+
     // ================================
     // 6. HISTORY MANAGEMENT
     // ================================
@@ -2985,6 +3310,67 @@ let CATEGORY_LIBRARY = {
         });
         document.getElementById('testBtn').disabled = false;
         document.getElementById('testBtn').addEventListener('click', testTableCoverage);
+    });
+
+    // Safe initialization
+    window.addEventListener('load', () => {
+        // Small timeout ensures all HTML is definitely ready
+        setTimeout(() => {
+            const select = document.getElementById('tableSelect');
+            const triggerText = document.getElementById('currentTargetName');
+            const triggerBtn = document.getElementById('menuTrigger');
+
+            if (select && select.options.length > 0 && select.selectedIndex !== -1) {
+                if (triggerText) {
+                    triggerText.textContent = select.options[select.selectedIndex].text;
+                }
+            }
+            
+            if (triggerBtn) triggerBtn.disabled = false;
+            
+            // Load the recents UI
+            renderRecentChips();
+        }, 100); 
+    });
+
+    // Quick Search Logic
+    document.getElementById('tableSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const select = document.getElementById('tableSelect');
+        const optgroups = select.getElementsByTagName('optgroup');
+        let firstVisible = null;
+
+        for (let group of optgroups) {
+            let hasVisibleOption = false;
+            const options = group.getElementsByTagName('option');
+            
+            for (let opt of options) {
+                const text = opt.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    opt.style.display = ""; // Show
+                    hasVisibleOption = true;
+                    if (!firstVisible) firstVisible = opt;
+                } else {
+                    opt.style.display = "none"; // Hide
+                }
+            }
+            
+            // Hide the whole category if no tables match
+            group.style.display = hasVisibleOption ? "" : "none";
+        }
+
+        // Auto-select the first result so you can just hit "Roll"
+        if (firstVisible && searchTerm !== "") {
+            select.value = firstVisible.value;
+            updateInfoPanel();
+        }
+    });
+
+    // Optional: Press "Enter" in search box to trigger the Roll button
+    document.getElementById('tableSearch').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') {
+            performRoll();
+        }
     });
 
     
