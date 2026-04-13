@@ -406,25 +406,105 @@
         if (!expr) return 0;
         expr = expr.trim();
         if (expr === "") return 0;
+        // Simple signed number (e.g., "+5", "-3")
         if (/^[\+\-]\d+$/.test(expr)) return parseInt(expr, 10);
         
-        // Handle "d20" as "1d20"
-        let diceExpr = expr;
-        if (/^d\d+$/i.test(expr)) diceExpr = "1" + expr;
-        const dicePattern = /(\d+)d(\d+)/i;
-        const match = diceExpr.match(dicePattern);
-        if (!match) return isNaN(parseInt(expr,10)) ? 0 : parseInt(expr,10);
-        const count = parseInt(match[1], 10);
-        const sides = parseInt(match[2], 10);
-        let sum = 0;
-        for (let i = 0; i < count; i++) sum += Math.floor(Math.random() * sides) + 1;
-        const rest = expr.replace(dicePattern, "").trim();
-        if (rest.startsWith("+")) sum += parseInt(rest.slice(1), 10);
-        else if (rest.startsWith("-")) sum -= parseInt(rest.slice(1), 10);
-        else if (rest.startsWith("*")) sum *= parseInt(rest.slice(1), 10);
-        if (sum <= 0) sum = 1;
-        return sum;
+        // Replace all dice patterns with their rolled values
+        const evaluated = expr.replace(/(\d*)d(\d+)/gi, (match, countStr, sidesStr) => {
+            let count = parseInt(countStr, 10);
+            if (isNaN(count)) count = 1;           // "d6" means 1d6
+            const sides = parseInt(sidesStr, 10);
+            let sum = 0;
+            for (let i = 0; i < count; i++) {
+                sum += Math.floor(Math.random() * sides) + 1;
+            }
+            return sum;
+        });
+        
+        // Now evaluate the arithmetic expression safely
+        try {
+            let result = eval(evaluated);
+            result = Math.floor(result); 
+            if (result <= 0) result = 1;
+            return result;
+        } catch (e) {
+            console.error("Error evaluating expression:", evaluated, e);
+            return 0;
+        }
     }
+
+    function testEvaluateDiceExpr() {
+        let passed = 0;
+        let failed = 0;
+
+        function assert(condition, message) {
+            if (condition) {
+                passed++;
+                console.log(`✅ PASS: ${message}`);
+            } else {
+                failed++;
+                console.error(`❌ FAIL: ${message}`);
+            }
+        }
+
+        // 1. Simple dice
+        for (let i = 0; i < 20; i++) {
+            const val = evaluateDiceExpr("d6");
+            assert(val >= 1 && val <= 6, "d6 returns 1-6");
+        }
+        for (let i = 0; i < 20; i++) {
+            const val = evaluateDiceExpr("2d6");
+            assert(val >= 2 && val <= 12, "2d6 returns 2-12");
+        }
+
+        // 2. Arithmetic with dice
+        for (let i = 0; i < 20; i++) {
+            const val = evaluateDiceExpr("d6+5");
+            assert(val >= 6 && val <= 11, "d6+5 returns 6-11");
+        }
+        for (let i = 0; i < 20; i++) {
+            const val = evaluateDiceExpr("2d8-3");
+            assert(val >= -1 && val <= 13, "2d8-3 returns -1 to 13");
+        }
+
+        // 3. Parentheses and multiplication
+        const test1 = evaluateDiceExpr("(1d6+1)*10");
+        // After rolling 1d6 (1-6), expression becomes (x+1)*10 => range 20-70, step 10
+        const possible = [20,30,40,50,60,70];
+        assert(possible.includes(test1), `(1d6+1)*10 gives one of ${possible.join(",")} (got ${test1})`);
+
+        const test2 = evaluateDiceExpr("(2d4)*5");
+        // 2d4 gives 2-8, times 5 => 10,15,20,25,30,35,40
+        const possible2 = [10,15,20,25,30,35,40];
+        assert(possible2.includes(test2), `(2d4)*5 gives one of ${possible2.join(",")} (got ${test2})`);
+
+        // 4. Signed numbers
+        assert(evaluateDiceExpr("+5") === 5, "+5 returns 5");
+        assert(evaluateDiceExpr("-3") === -3, "-3 returns -3");
+        assert(evaluateDiceExpr("+0") === 0, "+0 returns 0");
+
+        // 5. Edge cases
+        assert(evaluateDiceExpr("") === 0, "empty string returns 0");
+        assert(evaluateDiceExpr(null) === 0, "null returns 0");
+        assert(evaluateDiceExpr("   ") === 0, "whitespace returns 0");
+        assert(evaluateDiceExpr("abc") === 0, "invalid string returns 0 (NaN handled)");
+
+        // 6. Complex expressions without dice (should evaluate directly)
+        assert(evaluateDiceExpr("10+5") === 15, "10+5 = 15");
+        assert(evaluateDiceExpr("(10+5)*2") === 30, "(10+5)*2 = 30");
+        assert(evaluateDiceExpr("100/4") === 25, "100/4 = 25");
+
+        // 7. Ensure original dice‑only expressions still work
+        assert(evaluateDiceExpr("d20") >= 1 && evaluateDiceExpr("d20") <= 20, "d20 works");
+        assert(evaluateDiceExpr("3d10") >= 3 && evaluateDiceExpr("3d10") <= 30, "3d10 works");
+
+        console.log(`\n📊 Test results: ${passed} passed, ${failed} failed`);
+        if (failed === 0) console.log("🎉 All tests passed – evaluateDiceExpr is correct.");
+        else console.warn("⚠️ Some tests failed – review the function.");
+    }
+
+    // Run the test
+    testEvaluateDiceExpr();
 
     function evaluateMultiple(exprListStr) {
         if (!exprListStr) return [];
